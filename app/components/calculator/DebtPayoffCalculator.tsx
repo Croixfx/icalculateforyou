@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { monthsToPayoff, paymentForTarget, type PayoffResult } from "@/lib/engine";
-import { formatCurrency, getCurrencyOptions, resolveCurrency, setPreferredCurrency } from "@/lib/locale";
+import { formatCurrency, getCurrencyOptions, getPreferredCurrency, detectLocale, setPreferredCurrency } from "@/lib/locale";
 import {
   addMonths,
   buildShareUrl,
@@ -90,12 +90,19 @@ export function DebtPayoffCalculator({ region }: DebtPayoffCalculatorProps) {
   const [hydrated, setHydrated] = useState(false);
 
   // Render with the region's default currency first (matches the server), then
-  // layer in any shared-link params and the detected/saved currency after
+  // layer in any shared-link params and the saved/detected currency after
   // mount — avoids a hydration mismatch, at the cost of a brief post-load
   // update for shared links (inherent to a statically-exported site: there's
   // no per-request server to pre-render a visitor's query string).
+  //
+  // Currency priority: URL param > a previously saved manual choice > the
+  // region's own currency for a country page (a /ca/ visitor should see CAD
+  // by default, not whatever their browser's locale happens to suggest) >
+  // browser detection, which only makes sense on the currency-agnostic "/"
+  // page.
   useEffect(() => {
     const fromUrl = decodeFormState(window.location.search);
+    const fallbackCurrency = region === "default" ? detectLocale().currency : config.currency;
     // Adopting client-only external state (URL, localStorage) on mount; a
     // lazy useState initializer would also run during SSR and cause a
     // hydration mismatch, which is exactly what this effect exists to avoid.
@@ -103,10 +110,10 @@ export function DebtPayoffCalculator({ region }: DebtPayoffCalculatorProps) {
     setState((prev) => ({
       ...prev,
       ...fromUrl,
-      currency: fromUrl.currency ?? resolveCurrency(),
+      currency: fromUrl.currency ?? getPreferredCurrency() ?? fallbackCurrency,
     }));
     setHydrated(true);
-  }, []);
+  }, [region, config.currency]);
 
   // Keep the URL in sync so the current result is always a shareable link,
   // without spamming browser history on every keystroke. Gated on `hydrated`
@@ -188,7 +195,14 @@ export function DebtPayoffCalculator({ region }: DebtPayoffCalculatorProps) {
     }
   })();
 
-  const currencyOptions = getCurrencyOptions(config.locale);
+  // The full currency list comes from the runtime's Intl.supportedValuesOf,
+  // which Node (server) and Chromium (client) can report differently sized
+  // sets for — computing it during the initial render risks a hydration
+  // mismatch. Render just the current currency until hydrated (guaranteed
+  // identical both sides), then swap in the full list.
+  const currencyOptions = hydrated
+    ? getCurrencyOptions(config.locale)
+    : [{ code: state.currency, name: state.currency }];
 
   async function handleCopyLink() {
     const base = `${window.location.origin}${window.location.pathname}`;

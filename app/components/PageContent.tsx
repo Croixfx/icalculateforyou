@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { ContentStrings, RegionKey } from "@/lib/content";
 import { AdSlot } from "./AdSlot";
 
@@ -33,9 +32,9 @@ export function PageContent({ region, content }: PageContentProps) {
         <section>
           <h2 className="text-xl font-semibold tracking-tight">{content.strategiesHeading}</h2>
           <p className="mt-2 text-black/75 dark:text-white/75">{content.strategiesBody}</p>
-          <Link href={content.strategiesLinkHref} className="mt-2 inline-block text-sm font-medium underline underline-offset-2">
-            {content.strategiesLinkLabel}
-          </Link>
+          {/* TODO: content.strategiesLinkHref points to a multi-debt comparison
+              page that doesn't exist yet. Re-add this link (and drop this
+              comment) once that page ships — an internal link must never 404. */}
         </section>
 
         <AdSlot id={`ad-content-${region}`} />
