@@ -72,49 +72,35 @@ body {
 }
 
 /*
- * Full-page background photo (light mode only), rendered by SiteBackground
- * as a position: fixed layer sized to the viewport (100vw/100vh) rather
- * than a `background-attachment: fixed` on body. That matters on a page
- * this long: `background-attachment: scroll` sizes `cover` against the
- * full scrollable height, zooming the photo in far past recognition on a
- * tall page, and `fixed` is unreliable on a lot of mobile browsers. A
- * dedicated fixed-position element sidesteps both — its own box is always
- * exactly the viewport, on every device, so `cover` sizing is predictable
- * everywhere. A single, fairly opaque warm wash sits over the photo — the
- * point is a calm, ambient texture behind the whole page, not a vivid
- * image competing with the calculator for attention. Actual content
- * (input fields, the results card, header) all keep their own solid
- * --surface/--background, so the photo only ever shows through in the
- * page's own margins and gaps. Bundled locally (public/hero-bg.webp,
- * ~75KB) rather than hotlinked, so there's no third-party request on the
- * critical path. Dark mode hides the layer entirely — the photo was shot
- * and graded for the light palette, not adapted for dark.
+ * Full-page background photo (light mode only) — set directly as body's
+ * own background-image, not a separate fixed-position element. That
+ * matters: two earlier attempts at a dedicated overlay div both broke
+ * visually (z-index: -1 didn't work because browsers propagate a
+ * non-positioned body's background color to paint the canvas itself, a
+ * layer beneath any z-index; removing the z-index then made the div
+ * paint *above* the hero and calculator instead, blanking them). None of
+ * that ambiguity exists here: a background is always beneath its own
+ * element's children by definition, full stop, no stacking context to
+ * reason about. `background-attachment: fixed` sizes `cover` against the
+ * viewport (not the page's full scrollable height), so this stays
+ * correctly framed no matter how long the page is, and keeps the photo
+ * anchored in place as the page scrolls. A darker, richer wash (rather
+ * than a near-white one) sits over the photo so it reads as a moodier,
+ * more deliberate backdrop instead of a pastel tint — still light enough
+ * that our dark-on-light text stays comfortably readable wherever it
+ * shows through. Actual content (input fields, the results card, header)
+ * all keep their own solid --surface/--background, so the photo only
+ * ever shows through in the page's own margins and gaps. Bundled locally
+ * (public/hero-bg.webp, ~75KB) rather than hotlinked, so there's no
+ * third-party request on the critical path. Dark mode drops the photo
+ * entirely — it was graded for the light palette, not adapted for dark.
  */
-.site-background {
-  position: fixed;
-  inset: 0;
-  /* Purely decorative — never intercept clicks meant for whatever's
-     visually on top of it. Without this, removing z-index (see below)
-     let this full-viewport div swallow pointer events intended for the
-     calculator, breaking every click-driven interaction. */
-  pointer-events: none;
-  /* No z-index (or a negative one): body has its own explicit `background`
-     below, and browsers propagate a non-positioned body's background to
-     paint the canvas itself — a layer that sits beneath *any* z-index,
-     including negative ones, on a fixed descendant. That combination is
-     exactly what made this layer invisible before: z-index: -1 doesn't
-     help when what's covering it isn't a stacking-context sibling, it's
-     the canvas paint. Relying on DOM order instead (this div is body's
-     first child, so it paints before the header/main/footer that follow)
-     reliably puts it behind real content without touching z-index at all. */
-  background-image: linear-gradient(rgba(247, 245, 240, 0.9), rgba(247, 245, 240, 0.9)), url("/hero-bg.webp");
+:root:not([data-theme="dark"]) body {
+  background-image: linear-gradient(rgba(214, 209, 197, 0.55), rgba(214, 209, 197, 0.55)), url("/hero-bg.webp");
   background-size: cover;
   background-position: center top;
   background-repeat: no-repeat;
-}
-
-:root[data-theme="dark"] .site-background {
-  display: none;
+  background-attachment: fixed;
 }
 
 /* Respect the user's motion preference globally, rather than per-element. */
