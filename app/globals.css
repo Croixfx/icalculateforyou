@@ -93,7 +93,20 @@ body {
 .site-background {
   position: fixed;
   inset: 0;
-  z-index: -1;
+  /* Purely decorative — never intercept clicks meant for whatever's
+     visually on top of it. Without this, removing z-index (see below)
+     let this full-viewport div swallow pointer events intended for the
+     calculator, breaking every click-driven interaction. */
+  pointer-events: none;
+  /* No z-index (or a negative one): body has its own explicit `background`
+     below, and browsers propagate a non-positioned body's background to
+     paint the canvas itself — a layer that sits beneath *any* z-index,
+     including negative ones, on a fixed descendant. That combination is
+     exactly what made this layer invisible before: z-index: -1 doesn't
+     help when what's covering it isn't a stacking-context sibling, it's
+     the canvas paint. Relying on DOM order instead (this div is body's
+     first child, so it paints before the header/main/footer that follow)
+     reliably puts it behind real content without touching z-index at all. */
   background-image: linear-gradient(rgba(247, 245, 240, 0.9), rgba(247, 245, 240, 0.9)), url("/hero-bg.webp");
   background-size: cover;
   background-position: center top;
