@@ -27,8 +27,8 @@ export function SiteChrome({ region, children }: SiteChromeProps) {
   return (
     <>
       <Header strings={strings} homeHref={homeHref} />
-      <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6">{children}</main>
-      <AdSlot id={`ad-bottom-${region}`} className="mx-auto my-4 max-w-4xl" />
+      <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:py-12">{children}</main>
+      <AdSlot id={`ad-bottom-${region}`} className="mx-auto mb-8 max-w-4xl" />
       <Footer strings={strings} />
     </>
   );

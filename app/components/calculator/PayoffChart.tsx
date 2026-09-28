@@ -95,7 +95,22 @@ export function PayoffChart({ baseline, whatIf, currency, locale, title, baselin
 
   return (
     <div>
-      <h3 className="text-sm font-medium text-black/80 dark:text-white/80">{title}</h3>
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <h3 className="text-sm font-medium text-foreground">{title}</h3>
+        {/* A single series needs no legend — the title already says what's plotted. */}
+        {hasWhatIf && (
+          <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-foreground/65">
+            <li className="flex items-center gap-1.5">
+              <span aria-hidden className="h-0.5 w-3 rounded-full" style={{ background: "var(--chart-series-1)" }} />
+              {baselineLabel}
+            </li>
+            <li className="flex items-center gap-1.5">
+              <span aria-hidden className="h-0.5 w-3 rounded-full" style={{ background: "var(--chart-series-2)" }} />
+              {whatIfLabel}
+            </li>
+          </ul>
+        )}
+      </div>
       <div className="mt-2 h-56 w-full" style={{ background: "var(--chart-surface)" }}>
         <svg
           viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
@@ -170,10 +185,13 @@ export function PayoffChart({ baseline, whatIf, currency, locale, title, baselin
             />
           )}
 
-          {/* End-of-line direct labels */}
-          <EndLabel points={paddedBaseline} xScale={xScale} yScale={yScale} color="var(--chart-series-1)" label={baselineLabel} anchorAbove />
+          {/* End-of-line markers. No direct text labels: both series converge
+              near $0 at the right edge, so direct labels would collide —
+              the legend below the chart carries identity instead, per the
+              dataviz skill's guidance for converging lines. */}
+          <EndMarker points={paddedBaseline} xScale={xScale} yScale={yScale} color="var(--chart-series-1)" />
           {hasWhatIf && paddedWhatIf && (
-            <EndLabel points={paddedWhatIf} xScale={xScale} yScale={yScale} color="var(--chart-series-2)" label={whatIfLabel} anchorAbove={false} />
+            <EndMarker points={paddedWhatIf} xScale={xScale} yScale={yScale} color="var(--chart-series-2)" />
           )}
 
           {/* Crosshair + tooltip */}
@@ -201,20 +219,16 @@ export function PayoffChart({ baseline, whatIf, currency, locale, title, baselin
   );
 }
 
-function EndLabel({
+function EndMarker({
   points,
   xScale,
   yScale,
   color,
-  label,
-  anchorAbove,
 }: {
   points: ChartPoint[];
   xScale: (m: number) => number;
   yScale: (b: number) => number;
   color: string;
-  label: string;
-  anchorAbove: boolean;
 }) {
   // Find the point where this series actually reaches 0 (not the padded tail).
   const zeroIndex = points.findIndex((p) => p.balance === 0);
@@ -223,20 +237,7 @@ function EndLabel({
   const x = xScale(point.month);
   const y = yScale(point.balance);
 
-  return (
-    <g>
-      <circle cx={x} cy={y} r={4} fill={color} stroke="var(--chart-surface)" strokeWidth={2} />
-      <text
-        x={x}
-        y={anchorAbove ? y - 10 : y + 18}
-        textAnchor="end"
-        fontSize={11}
-        fill="var(--chart-text-secondary)"
-      >
-        {label}
-      </text>
-    </g>
-  );
+  return <circle cx={x} cy={y} r={4} fill={color} stroke="var(--chart-surface)" strokeWidth={2} />;
 }
 
 function ChartTooltip({

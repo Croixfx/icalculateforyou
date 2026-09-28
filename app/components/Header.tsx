@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { SiteStrings } from "@/lib/content";
+import { ThemeToggle } from "./ThemeToggle";
 
 interface HeaderProps {
   strings: SiteStrings;
@@ -14,18 +15,30 @@ interface HeaderProps {
 // nothing noticeable and avoids console errors on every static host.
 export function Header({ strings, homeHref }: HeaderProps) {
   return (
-    <header className="border-b border-black/10 dark:border-white/10">
-      <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-4 py-4">
-        <Link href={homeHref} prefetch={false} className="text-lg font-semibold tracking-tight">
+    <header className="border-b border-foreground/10">
+      <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3 px-4 py-4">
+        <Link
+          href={homeHref}
+          prefetch={false}
+          className="min-h-11 py-2 text-lg font-semibold tracking-tight text-foreground"
+        >
           {strings.header.siteName}
         </Link>
-        <nav className="flex gap-4 text-sm">
-          {strings.header.nav.map((item) => (
-            <Link key={item.href} href={item.href} prefetch={false} className="hover:underline">
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+        <div className="flex flex-wrap items-center gap-4">
+          <nav className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+            {strings.header.nav.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                prefetch={false}
+                className="flex min-h-11 items-center text-foreground/65 underline-offset-2 transition-colors hover:text-foreground hover:underline"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+          <ThemeToggle />
+        </div>
       </div>
     </header>
   );

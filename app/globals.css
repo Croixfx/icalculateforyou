@@ -1,10 +1,29 @@
 @import "tailwindcss";
 
+/*
+ * Theme: warm off-white / soft near-black in light mode, warm dark gray
+ * (never pure black) in dark mode, one calm accent. Every foreground/
+ * background pairing below is contrast-checked at WCAG AA (4.5:1 for text).
+ *
+ * Dark mode has two triggers that must both work: the OS setting
+ * (prefers-color-scheme) and a manual toggle (ThemeToggle sets
+ * data-theme on <html> and persists it). The media-query block is guarded
+ * with :not([data-theme="light"]) so an explicit light choice beats a dark
+ * OS setting; the [data-theme="dark"] block lets an explicit dark choice
+ * win regardless of the OS setting.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+  --background: #f7f5f0;
+  --foreground: #292620;
+  --surface: #ffffff;
+  --accent: #2b6a9c;
+  --accent-hover: #235777;
+  --accent-foreground: #ffffff;
+  --error: #b3261e;
+  --error-bg: #fbeceb;
 
-  /* Chart tokens (dataviz skill reference palette) */
+  /* Chart tokens (dataviz skill reference palette, adapted to this theme) */
   --chart-surface: #fcfcfb;
   --chart-text-primary: #0b0b0b;
   --chart-text-secondary: #52514e;
@@ -18,14 +37,27 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-error: var(--error);
+  --color-error-bg: var(--error-bg);
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: ui-monospace, "SFMono-Regular", Consolas, monospace;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --background: #1e1c18;
+    --foreground: #f3f1ec;
+    --surface: #26241f;
+    --accent: #6fa8dc;
+    --accent-hover: #8dbbe6;
+    --accent-foreground: #1e1c18;
+    --error: #f2837a;
+    --error-bg: #3a201d;
 
     --chart-surface: #1a1a19;
     --chart-text-primary: #ffffff;
@@ -38,7 +70,40 @@
   }
 }
 
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #1e1c18;
+  --foreground: #f3f1ec;
+  --surface: #26241f;
+  --accent: #6fa8dc;
+  --accent-hover: #8dbbe6;
+  --accent-foreground: #1e1c18;
+  --error: #f2837a;
+  --error-bg: #3a201d;
+
+  --chart-surface: #1a1a19;
+  --chart-text-primary: #ffffff;
+  --chart-text-secondary: #c3c2b7;
+  --chart-text-muted: #898781;
+  --chart-gridline: #2c2c2a;
+  --chart-axis: #383835;
+  --chart-series-1: #3987e5;
+  --chart-series-2: #d95926;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
+}
+
+/* Respect the user's motion preference globally, rather than per-element. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -220,7 +220,7 @@ export function DebtPayoffCalculator({ region }: DebtPayoffCalculatorProps) {
   return (
     <div>
       {/* Mode tabs */}
-      <div role="tablist" aria-label={strings.resultsHeading} className="flex gap-1 border-b border-black/10 dark:border-white/10">
+      <div role="tablist" aria-label={strings.resultsHeading} className="flex gap-1 border-b border-foreground/10">
         {(["duration", "target"] as const).map((mode) => (
           <button
             key={mode}
@@ -228,10 +228,10 @@ export function DebtPayoffCalculator({ region }: DebtPayoffCalculatorProps) {
             role="tab"
             aria-selected={state.mode === mode}
             onClick={() => update("mode", mode)}
-            className={`-mb-px rounded-t border-b-2 px-4 py-2 text-sm font-medium ${
+            className={`-mb-px flex min-h-11 items-center border-b-2 px-4 text-sm font-medium transition-colors outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
               state.mode === mode
-                ? "border-black text-black dark:border-white dark:text-white"
-                : "border-transparent text-black/60 hover:text-black dark:text-white/60 dark:hover:text-white"
+                ? "border-accent text-foreground"
+                : "border-transparent text-foreground/65 hover:text-foreground"
             }`}
           >
             {mode === "duration" ? strings.modeDuration : strings.modeTarget}
@@ -306,19 +306,20 @@ export function DebtPayoffCalculator({ region }: DebtPayoffCalculatorProps) {
       </div>
 
       {/* Advanced: rate type */}
-      <details className="group mt-4">
-        <summary className="cursor-pointer list-none text-sm font-medium text-black/70 hover:text-black dark:text-white/70 dark:hover:text-white">
+      <details className="group mt-5">
+        <summary className="flex min-h-11 w-fit cursor-pointer list-none items-center text-sm font-medium text-foreground/65 transition-colors hover:text-foreground">
           {strings.advancedToggle}
         </summary>
-        <fieldset className="mt-3 flex flex-col gap-2 sm:flex-row sm:gap-6">
-          <legend className="mb-1 text-sm text-black/60 dark:text-white/60">{strings.rateTypeLabel}</legend>
+        <fieldset className="mt-2 flex flex-col gap-1 sm:flex-row sm:gap-6">
+          <legend className="mb-1 text-sm text-foreground/65">{strings.rateTypeLabel}</legend>
           {(["nominal", "effective"] as const).map((rt) => (
-            <label key={rt} className="flex items-center gap-2 text-sm">
+            <label key={rt} className="flex min-h-11 items-center gap-2 text-sm">
               <input
                 type="radio"
                 name="rateType"
                 checked={state.rateType === rt}
                 onChange={() => update("rateType", rt)}
+                className="h-4 w-4 accent-accent"
               />
               {rt === "nominal" ? strings.rateTypeNominal : strings.rateTypeEffective}
             </label>
@@ -329,34 +330,48 @@ export function DebtPayoffCalculator({ region }: DebtPayoffCalculatorProps) {
       {/* Results */}
       <div className="mt-6">
         {computation?.kind === "error" && (
-          <p role="alert" className="rounded border border-black/15 bg-black/[.03] px-4 py-3 text-sm text-black/80 dark:border-white/20 dark:bg-white/[.05] dark:text-white/80">
+          <p role="alert" className="rounded-lg border border-error/30 bg-error-bg px-4 py-3 text-sm font-medium text-error">
             {strings.errorTooSlow}
           </p>
         )}
 
         {computation?.kind === "ok" && (
           <>
-            <h2 className="text-lg font-semibold">{strings.resultsHeading}</h2>
-            <dl className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-4">
-              <ResultStat
-                label={strings.debtFreeDateLabel}
-                value={formatMonthYear(addMonths(new Date(), computation.baseline.months), config.locale)}
-              />
-              <ResultStat label={strings.monthsLabel} value={String(computation.baseline.months)} />
-              <ResultStat label={strings.totalInterestLabel} value={money(computation.baseline.totalInterest)} />
-              <ResultStat label={strings.totalPaidLabel} value={money(computation.baseline.totalPaid)} />
-            </dl>
-            {state.mode === "target" && (
-              <p className="mt-3 text-sm text-black/70 dark:text-white/70">
-                {strings.requiredPaymentLabel}: <strong>{money(computation.payment)}</strong>
+            <div className="rounded-xl border border-foreground/10 bg-surface p-5 shadow-sm sm:p-6">
+              <h2 className="text-sm font-semibold tracking-wide text-foreground/65 uppercase">
+                {strings.resultsHeading}
+              </h2>
+
+              <p className="mt-2 text-3xl font-semibold tracking-tight text-accent sm:text-4xl">
+                {formatMonthYear(addMonths(new Date(), computation.baseline.months), config.locale)}
               </p>
-            )}
+              <p className="mt-1 text-sm text-foreground/65">{strings.debtFreeDateLabel}</p>
+
+              <dl className="mt-5 grid grid-cols-2 gap-4 border-t border-foreground/10 pt-5 sm:grid-cols-3">
+                <ResultStat label={strings.monthsLabel} value={String(computation.baseline.months)} />
+                <ResultStat label={strings.totalInterestLabel} value={money(computation.baseline.totalInterest)} />
+                <ResultStat label={strings.totalPaidLabel} value={money(computation.baseline.totalPaid)} />
+              </dl>
+              {state.mode === "target" && (
+                <p className="mt-4 text-sm text-foreground/65">
+                  {strings.requiredPaymentLabel}:{" "}
+                  <strong className="font-semibold text-foreground">{money(computation.payment)}</strong>
+                </p>
+              )}
+            </div>
 
             {/* What if */}
-            <div className="mt-6">
-              <h3 className="text-sm font-medium text-black/80 dark:text-white/80">{strings.whatIfHeading}</h3>
-              <label htmlFor="extraPercent" className="mt-2 flex items-center gap-3 text-sm">
-                <span className="w-40 shrink-0 text-black/60 dark:text-white/60">{strings.whatIfLabel}</span>
+            <div className="mt-6 rounded-xl border border-foreground/10 p-5 sm:p-6">
+              <h3 className="text-sm font-medium text-foreground">{strings.whatIfHeading}</h3>
+              <div className="mt-3 text-sm">
+                <div className="flex items-baseline justify-between gap-3">
+                  <label htmlFor="extraPercent" className="text-foreground/65">
+                    {strings.whatIfLabel}
+                  </label>
+                  <span className="font-medium tabular-nums text-foreground">
+                    +{money(computation.extraAmount)}
+                  </span>
+                </div>
                 <input
                   id="extraPercent"
                   type="range"
@@ -365,17 +380,18 @@ export function DebtPayoffCalculator({ region }: DebtPayoffCalculatorProps) {
                   step={1}
                   value={clampExtraPercent(state.extraPercent)}
                   onChange={(e) => update("extraPercent", e.target.value)}
-                  className="flex-1"
+                  className="mt-2 h-11 w-full rounded accent-accent outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                 />
-                <span className="w-28 shrink-0 text-right tabular-nums">
-                  +{money(computation.extraAmount)}
-                </span>
-              </label>
+              </div>
               {computation.whatIf && (
-                <p className="mt-2 text-sm">
-                  <strong>{computation.baseline.months - computation.whatIf.months}</strong>{" "}
+                <p className="mt-3 text-sm text-foreground/65">
+                  <strong className="font-semibold text-accent">
+                    {computation.baseline.months - computation.whatIf.months}
+                  </strong>{" "}
                   {strings.whatIfMonthsSaved} &middot;{" "}
-                  <strong>{money(computation.baseline.totalInterest - computation.whatIf.totalInterest)}</strong>{" "}
+                  <strong className="font-semibold text-accent">
+                    {money(computation.baseline.totalInterest - computation.whatIf.totalInterest)}
+                  </strong>{" "}
                   {strings.whatIfInterestSaved}
                 </p>
               )}
@@ -408,7 +424,7 @@ export function DebtPayoffCalculator({ region }: DebtPayoffCalculatorProps) {
             <button
               type="button"
               onClick={handleCopyLink}
-              className="mt-6 rounded border border-black/20 px-4 py-2 text-sm font-medium hover:bg-black/[.03] dark:border-white/25 dark:hover:bg-white/[.05]"
+              className="mt-6 flex min-h-11 items-center rounded-lg border border-foreground/20 px-4 text-sm font-medium text-foreground outline-none transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
             >
               {copyStatus === "copied" ? strings.copyLinkCopied : strings.copyLinkButton}
             </button>
@@ -438,7 +454,7 @@ export function DebtPayoffCalculator({ region }: DebtPayoffCalculatorProps) {
 }
 
 const inputClass =
-  "w-full rounded border border-black/20 bg-white px-3 py-2 text-base text-black outline-none focus:border-black/60 dark:border-white/25 dark:bg-black dark:text-white dark:focus:border-white/60";
+  "min-h-11 w-full rounded-lg border border-foreground/20 bg-surface px-3 py-2 text-base text-foreground outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent/25";
 
 function Field({
   label,
@@ -453,12 +469,12 @@ function Field({
 }) {
   return (
     <div>
-      <label htmlFor={htmlFor} className="mb-1 block text-sm font-medium text-black/80 dark:text-white/80">
+      <label htmlFor={htmlFor} className="mb-1.5 block text-sm font-medium text-foreground">
         {label}
       </label>
       {children}
       {error && (
-        <p role="alert" className="mt-1 text-sm text-red-700 dark:text-red-400">
+        <p role="alert" className="mt-1.5 text-sm font-medium text-error">
           {error}
         </p>
       )}
@@ -469,8 +485,8 @@ function Field({
 function ResultStat({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-xs text-black/60 dark:text-white/60">{label}</dt>
-      <dd className="text-lg font-semibold tabular-nums">{value}</dd>
+      <dt className="text-xs text-foreground/65">{label}</dt>
+      <dd className="mt-0.5 text-xl font-semibold tabular-nums text-foreground">{value}</dd>
     </div>
   );
 }
