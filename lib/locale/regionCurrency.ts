@@ -1,0 +1,97 @@
+/**
+ * Maps ISO 3166-1 alpha-2 region codes to their primary ISO 4217 currency.
+ * Not exhaustive of every territory on Earth, but covers the large majority
+ * of visitors. Anything missing falls back to USD in detectCurrency(), and
+ * the manual currency selector always lets a visitor override this guess.
+ */
+export const REGION_TO_CURRENCY: Record<string, string> = {
+  US: "USD",
+  GB: "GBP",
+  CA: "CAD",
+  AU: "AUD",
+  NZ: "NZD",
+  IE: "EUR",
+  DE: "EUR",
+  FR: "EUR",
+  ES: "EUR",
+  IT: "EUR",
+  NL: "EUR",
+  BE: "EUR",
+  AT: "EUR",
+  PT: "EUR",
+  FI: "EUR",
+  GR: "EUR",
+  LU: "EUR",
+  SK: "EUR",
+  SI: "EUR",
+  LT: "EUR",
+  LV: "EUR",
+  EE: "EUR",
+  CY: "EUR",
+  MT: "EUR",
+  HR: "EUR",
+  CH: "CHF",
+  LI: "CHF",
+  SE: "SEK",
+  NO: "NOK",
+  DK: "DKK",
+  IS: "ISK",
+  PL: "PLN",
+  CZ: "CZK",
+  HU: "HUF",
+  RO: "RON",
+  BG: "BGN",
+  RS: "RSD",
+  UA: "UAH",
+  RU: "RUB",
+  TR: "TRY",
+  IL: "ILS",
+  AE: "AED",
+  SA: "SAR",
+  QA: "QAR",
+  KW: "KWD",
+  BH: "BHD",
+  OM: "OMR",
+  JO: "JOD",
+  EG: "EGP",
+  ZA: "ZAR",
+  NG: "NGN",
+  KE: "KES",
+  GH: "GHS",
+  MA: "MAD",
+  IN: "INR",
+  PK: "PKR",
+  BD: "BDT",
+  LK: "LKR",
+  NP: "NPR",
+  CN: "CNY",
+  HK: "HKD",
+  MO: "MOP",
+  TW: "TWD",
+  JP: "JPY",
+  KR: "KRW",
+  SG: "SGD",
+  MY: "MYR",
+  TH: "THB",
+  VN: "VND",
+  PH: "PHP",
+  ID: "IDR",
+  BR: "BRL",
+  MX: "MXN",
+  AR: "ARS",
+  CL: "CLP",
+  CO: "COP",
+  PE: "PEN",
+  UY: "UYU",
+  VE: "VES",
+};
+
+/**
+ * Best-effort currency guess for a region code. Falls back to USD for any
+ * region not in the map, since this is only ever a starting suggestion that
+ * the visitor can change via the manual currency selector.
+ */
+export function currencyForRegion(region: string | undefined): string {
+  if (!region) return "USD";
+  return REGION_TO_CURRENCY[region.toUpperCase()] ?? "USD";
+}
