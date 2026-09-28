@@ -342,7 +342,7 @@ export function DebtPayoffCalculator({ region }: DebtPayoffCalculatorProps) {
                 {strings.resultsHeading}
               </h2>
 
-              <p className="mt-2 text-3xl font-semibold tracking-tight text-accent sm:text-4xl">
+              <p className="mt-2 text-4xl font-semibold tracking-tight text-accent sm:text-5xl">
                 {formatMonthYear(addMonths(new Date(), computation.baseline.months), config.locale)}
               </p>
               <p className="mt-1 text-sm text-foreground/65">{strings.debtFreeDateLabel}</p>
@@ -485,8 +485,8 @@ function Field({
 function ResultStat({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-xs text-foreground/65">{label}</dt>
-      <dd className="mt-0.5 text-xl font-semibold tabular-nums text-foreground">{value}</dd>
+      <dt className="text-sm text-foreground/70">{label}</dt>
+      <dd className="mt-0.5 text-2xl font-semibold tabular-nums text-foreground sm:text-[1.75rem]">{value}</dd>
     </div>
   );
 }

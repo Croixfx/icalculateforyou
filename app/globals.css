@@ -5,12 +5,10 @@
  * (never pure black) in dark mode, one calm accent. Every foreground/
  * background pairing below is contrast-checked at WCAG AA (4.5:1 for text).
  *
- * Dark mode has two triggers that must both work: the OS setting
- * (prefers-color-scheme) and a manual toggle (ThemeToggle sets
- * data-theme on <html> and persists it). The media-query block is guarded
- * with :not([data-theme="light"]) so an explicit light choice beats a dark
- * OS setting; the [data-theme="dark"] block lets an explicit dark choice
- * win regardless of the OS setting.
+ * Light is the hard default regardless of OS setting — intentional, not an
+ * oversight: dark mode is opt-in only, via the ThemeToggle icon button,
+ * which sets data-theme="dark" on <html> and persists it. There is no
+ * prefers-color-scheme auto-switch.
  */
 :root {
   color-scheme: light;
@@ -47,29 +45,6 @@
   --font-mono: ui-monospace, "SFMono-Regular", Consolas, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-    --background: #1e1c18;
-    --foreground: #f3f1ec;
-    --surface: #26241f;
-    --accent: #6fa8dc;
-    --accent-hover: #8dbbe6;
-    --accent-foreground: #1e1c18;
-    --error: #f2837a;
-    --error-bg: #3a201d;
-
-    --chart-surface: #1a1a19;
-    --chart-text-primary: #ffffff;
-    --chart-text-secondary: #c3c2b7;
-    --chart-text-muted: #898781;
-    --chart-gridline: #2c2c2a;
-    --chart-axis: #383835;
-    --chart-series-1: #3987e5;
-    --chart-series-2: #d95926;
-  }
-}
-
 :root[data-theme="dark"] {
   color-scheme: dark;
   --background: #1e1c18;
@@ -94,6 +69,33 @@
 body {
   background: var(--background);
   color: var(--foreground);
+}
+
+/*
+ * Hero banner background photo (light mode only — see HeroBanner.tsx).
+ * A light, mostly-opaque wash over the photo keeps the heading/subtitle
+ * text comfortably at or above the same contrast ratios as plain text on
+ * --background, while still letting the photo read clearly on the right
+ * side where there's no text. Bundled locally (public/hero-bg.webp, ~75KB)
+ * rather than hotlinked, so there's no third-party request on the critical
+ * path. Dark mode drops the photo entirely and falls back to --surface —
+ * the photo was shot and graded for the light palette, not adapted for dark.
+ */
+.hero-banner {
+  background-image: linear-gradient(
+      to right,
+      rgba(247, 245, 240, 0.96) 0%,
+      rgba(247, 245, 240, 0.86) 45%,
+      rgba(247, 245, 240, 0.55) 100%
+    ),
+    url("/hero-bg.webp");
+  background-size: cover;
+  background-position: center;
+}
+
+:root[data-theme="dark"] .hero-banner {
+  background-image: none;
+  background-color: var(--surface);
 }
 
 /* Respect the user's motion preference globally, rather than per-element. */

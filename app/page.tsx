@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SiteChrome } from "./components/SiteChrome";
 import { DebtPayoffCalculator } from "./components/calculator/DebtPayoffCalculator";
+import { HeroBanner } from "./components/HeroBanner";
 import { PageContent } from "./components/PageContent";
 import { StructuredData } from "./components/StructuredData";
 import { alternateLanguages, getStrings, REGIONS, SITE_URL } from "@/lib/content";
@@ -20,10 +21,7 @@ export default function Home() {
   return (
     <SiteChrome region="default">
       <StructuredData region={REGIONS.default} strings={strings} />
-      <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{strings.hero.title}</h1>
-      <p className="mt-3 max-w-prose text-base leading-relaxed text-foreground/65 sm:text-lg">
-        {strings.hero.subtitle}
-      </p>
+      <HeroBanner title={strings.hero.title} subtitle={strings.hero.subtitle} />
       <div className="mt-8">
         <DebtPayoffCalculator region="default" />
       </div>
