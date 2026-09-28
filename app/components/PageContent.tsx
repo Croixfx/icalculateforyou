@@ -21,19 +21,19 @@ export function PageContent({ region, content }: PageContentProps) {
       <article className="max-w-prose space-y-12">
         <section>
           <h2 className="text-xl font-semibold tracking-tight">{content.howInterestWorksHeading}</h2>
-          <p className="mt-3 text-base leading-relaxed text-foreground/65 sm:text-lg">
+          <p className="mt-3 text-base leading-relaxed text-foreground/75 sm:text-lg">
             {content.howInterestWorksBody}
           </p>
         </section>
 
         <section>
           <h2 className="text-xl font-semibold tracking-tight">{content.howToUseHeading}</h2>
-          <p className="mt-3 text-base leading-relaxed text-foreground/65 sm:text-lg">{content.howToUseBody}</p>
+          <p className="mt-3 text-base leading-relaxed text-foreground/75 sm:text-lg">{content.howToUseBody}</p>
         </section>
 
         <section>
           <h2 className="text-xl font-semibold tracking-tight">{content.strategiesHeading}</h2>
-          <p className="mt-3 text-base leading-relaxed text-foreground/65 sm:text-lg">{content.strategiesBody}</p>
+          <p className="mt-3 text-base leading-relaxed text-foreground/75 sm:text-lg">{content.strategiesBody}</p>
           {/* TODO: content.strategiesLinkHref points to a multi-debt comparison
               page that doesn't exist yet. Re-add this link (and drop this
               comment) once that page ships — an internal link must never 404. */}
@@ -47,7 +47,7 @@ export function PageContent({ region, content }: PageContentProps) {
             {content.faq.map((item) => (
               <div key={item.question}>
                 <dt className="font-medium text-foreground">{item.question}</dt>
-                <dd className="mt-1.5 text-base leading-relaxed text-foreground/65 sm:text-lg">{item.answer}</dd>
+                <dd className="mt-1.5 text-base leading-relaxed text-foreground/75 sm:text-lg">{item.answer}</dd>
               </div>
             ))}
           </dl>

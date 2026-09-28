@@ -99,7 +99,7 @@ export function PayoffChart({ baseline, whatIf, currency, locale, title, baselin
         <h3 className="text-sm font-medium text-foreground">{title}</h3>
         {/* A single series needs no legend — the title already says what's plotted. */}
         {hasWhatIf && (
-          <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-foreground/65">
+          <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-foreground/75">
             <li className="flex items-center gap-1.5">
               <span aria-hidden className="h-0.5 w-3 rounded-full" style={{ background: "var(--chart-series-1)" }} />
               {baselineLabel}

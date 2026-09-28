@@ -31,7 +31,7 @@ export function AmortizationTable({ schedule, currency, locale, showLabel, hideL
       >
         <table className="w-full min-w-[480px] border-collapse text-sm [font-variant-numeric:tabular-nums]">
           <thead className="bg-surface sticky top-0">
-            <tr className="text-left text-foreground/65">
+            <tr className="text-left text-foreground/75">
               <th scope="col" className="px-3 py-2 font-medium">
                 {headers.month}
               </th>

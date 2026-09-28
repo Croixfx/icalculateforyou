@@ -231,7 +231,7 @@ export function DebtPayoffCalculator({ region }: DebtPayoffCalculatorProps) {
             className={`-mb-px flex min-h-11 items-center border-b-2 px-4 text-sm font-medium transition-colors outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
               state.mode === mode
                 ? "border-accent text-foreground"
-                : "border-transparent text-foreground/65 hover:text-foreground"
+                : "border-transparent text-foreground/75 hover:text-foreground"
             }`}
           >
             {mode === "duration" ? strings.modeDuration : strings.modeTarget}
@@ -307,11 +307,11 @@ export function DebtPayoffCalculator({ region }: DebtPayoffCalculatorProps) {
 
       {/* Advanced: rate type */}
       <details className="group mt-5">
-        <summary className="flex min-h-11 w-fit cursor-pointer list-none items-center text-sm font-medium text-foreground/65 transition-colors hover:text-foreground">
+        <summary className="flex min-h-11 w-fit cursor-pointer list-none items-center text-sm font-medium text-foreground/75 transition-colors hover:text-foreground">
           {strings.advancedToggle}
         </summary>
         <fieldset className="mt-2 flex flex-col gap-1 sm:flex-row sm:gap-6">
-          <legend className="mb-1 text-sm text-foreground/65">{strings.rateTypeLabel}</legend>
+          <legend className="mb-1 text-sm text-foreground/75">{strings.rateTypeLabel}</legend>
           {(["nominal", "effective"] as const).map((rt) => (
             <label key={rt} className="flex min-h-11 items-center gap-2 text-sm">
               <input
@@ -338,14 +338,14 @@ export function DebtPayoffCalculator({ region }: DebtPayoffCalculatorProps) {
         {computation?.kind === "ok" && (
           <>
             <div className="rounded-xl border border-foreground/10 bg-surface p-5 shadow-sm sm:p-6">
-              <h2 className="text-sm font-semibold tracking-wide text-foreground/65 uppercase">
+              <h2 className="text-sm font-semibold tracking-wide text-foreground/75 uppercase">
                 {strings.resultsHeading}
               </h2>
 
               <p className="mt-2 text-4xl font-semibold tracking-tight text-accent sm:text-5xl">
                 {formatMonthYear(addMonths(new Date(), computation.baseline.months), config.locale)}
               </p>
-              <p className="mt-1 text-sm text-foreground/65">{strings.debtFreeDateLabel}</p>
+              <p className="mt-1 text-sm text-foreground/75">{strings.debtFreeDateLabel}</p>
 
               <dl className="mt-5 grid grid-cols-2 gap-4 border-t border-foreground/10 pt-5 sm:grid-cols-3">
                 <ResultStat label={strings.monthsLabel} value={String(computation.baseline.months)} />
@@ -353,7 +353,7 @@ export function DebtPayoffCalculator({ region }: DebtPayoffCalculatorProps) {
                 <ResultStat label={strings.totalPaidLabel} value={money(computation.baseline.totalPaid)} />
               </dl>
               {state.mode === "target" && (
-                <p className="mt-4 text-sm text-foreground/65">
+                <p className="mt-4 text-sm text-foreground/75">
                   {strings.requiredPaymentLabel}:{" "}
                   <strong className="font-semibold text-foreground">{money(computation.payment)}</strong>
                 </p>
@@ -365,7 +365,7 @@ export function DebtPayoffCalculator({ region }: DebtPayoffCalculatorProps) {
               <h3 className="text-sm font-medium text-foreground">{strings.whatIfHeading}</h3>
               <div className="mt-3 text-sm">
                 <div className="flex items-baseline justify-between gap-3">
-                  <label htmlFor="extraPercent" className="text-foreground/65">
+                  <label htmlFor="extraPercent" className="text-foreground/75">
                     {strings.whatIfLabel}
                   </label>
                   <span className="font-medium tabular-nums text-foreground">
@@ -384,12 +384,12 @@ export function DebtPayoffCalculator({ region }: DebtPayoffCalculatorProps) {
                 />
               </div>
               {computation.whatIf && (
-                <p className="mt-3 text-sm text-foreground/65">
-                  <strong className="font-semibold text-accent">
+                <p className="mt-3 text-sm text-foreground/75">
+                  <strong className="font-semibold text-foreground">
                     {computation.baseline.months - computation.whatIf.months}
                   </strong>{" "}
                   {strings.whatIfMonthsSaved} &middot;{" "}
-                  <strong className="font-semibold text-accent">
+                  <strong className="font-semibold text-foreground">
                     {money(computation.baseline.totalInterest - computation.whatIf.totalInterest)}
                   </strong>{" "}
                   {strings.whatIfInterestSaved}
@@ -485,7 +485,7 @@ function Field({
 function ResultStat({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-sm text-foreground/70">{label}</dt>
+      <dt className="text-sm text-foreground/75">{label}</dt>
       <dd className="mt-0.5 text-2xl font-semibold tabular-nums text-foreground sm:text-[1.75rem]">{value}</dd>
     </div>
   );

@@ -19,7 +19,7 @@ export function AdSlot({ id, label = "Advertisement", className = "" }: AdSlotPr
       data-ad-slot={id}
       className={`flex min-h-[90px] w-full items-center justify-center rounded-lg border border-dashed border-foreground/20 bg-foreground/[0.03] px-4 ${className}`}
     >
-      <span className="text-xs font-medium tracking-wide text-foreground/65 uppercase">{label}</span>
+      <span className="text-xs font-medium tracking-wide text-foreground/75 uppercase">{label}</span>
     </div>
   );
 }

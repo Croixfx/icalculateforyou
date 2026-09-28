@@ -15,7 +15,7 @@ interface HeaderProps {
 // nothing noticeable and avoids console errors on every static host.
 export function Header({ strings, homeHref }: HeaderProps) {
   return (
-    <header className="border-b border-foreground/10">
+    <header className="border-b border-foreground/10 bg-background/85 backdrop-blur-sm">
       <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3 px-4 py-4">
         <Link
           href={homeHref}
@@ -31,7 +31,7 @@ export function Header({ strings, homeHref }: HeaderProps) {
                 key={item.href}
                 href={item.href}
                 prefetch={false}
-                className="flex min-h-11 items-center text-foreground/65 underline-offset-2 transition-colors hover:text-foreground hover:underline"
+                className="flex min-h-11 items-center text-foreground/75 underline-offset-2 transition-colors hover:text-foreground hover:underline"
               >
                 {item.label}
               </Link>

@@ -13,10 +13,10 @@
 :root {
   color-scheme: light;
   --background: #f7f5f0;
-  --foreground: #292620;
+  --foreground: #403d36;
   --surface: #ffffff;
-  --accent: #2b6a9c;
-  --accent-hover: #235777;
+  --accent: #4a6478;
+  --accent-hover: #3c5162;
   --accent-foreground: #ffffff;
   --error: #b3261e;
   --error-bg: #fbeceb;
@@ -50,8 +50,8 @@
   --background: #1e1c18;
   --foreground: #f3f1ec;
   --surface: #26241f;
-  --accent: #6fa8dc;
-  --accent-hover: #8dbbe6;
+  --accent: #8ba9bf;
+  --accent-hover: #a0bcce;
   --accent-foreground: #1e1c18;
   --error: #f2837a;
   --error-bg: #3a201d;
@@ -72,30 +72,36 @@ body {
 }
 
 /*
- * Hero banner background photo (light mode only — see HeroBanner.tsx).
- * A light, mostly-opaque wash over the photo keeps the heading/subtitle
- * text comfortably at or above the same contrast ratios as plain text on
- * --background, while still letting the photo read clearly on the right
- * side where there's no text. Bundled locally (public/hero-bg.webp, ~75KB)
- * rather than hotlinked, so there's no third-party request on the critical
- * path. Dark mode drops the photo entirely and falls back to --surface —
- * the photo was shot and graded for the light palette, not adapted for dark.
+ * Full-page background photo (light mode only), rendered by SiteBackground
+ * as a position: fixed layer sized to the viewport (100vw/100vh) rather
+ * than a `background-attachment: fixed` on body. That matters on a page
+ * this long: `background-attachment: scroll` sizes `cover` against the
+ * full scrollable height, zooming the photo in far past recognition on a
+ * tall page, and `fixed` is unreliable on a lot of mobile browsers. A
+ * dedicated fixed-position element sidesteps both — its own box is always
+ * exactly the viewport, on every device, so `cover` sizing is predictable
+ * everywhere. A single, fairly opaque warm wash sits over the photo — the
+ * point is a calm, ambient texture behind the whole page, not a vivid
+ * image competing with the calculator for attention. Actual content
+ * (input fields, the results card, header) all keep their own solid
+ * --surface/--background, so the photo only ever shows through in the
+ * page's own margins and gaps. Bundled locally (public/hero-bg.webp,
+ * ~75KB) rather than hotlinked, so there's no third-party request on the
+ * critical path. Dark mode hides the layer entirely — the photo was shot
+ * and graded for the light palette, not adapted for dark.
  */
-.hero-banner {
-  background-image: linear-gradient(
-      to right,
-      rgba(247, 245, 240, 0.96) 0%,
-      rgba(247, 245, 240, 0.86) 45%,
-      rgba(247, 245, 240, 0.55) 100%
-    ),
-    url("/hero-bg.webp");
+.site-background {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image: linear-gradient(rgba(247, 245, 240, 0.9), rgba(247, 245, 240, 0.9)), url("/hero-bg.webp");
   background-size: cover;
-  background-position: center;
+  background-position: center top;
+  background-repeat: no-repeat;
 }
 
-:root[data-theme="dark"] .hero-banner {
-  background-image: none;
-  background-color: var(--surface);
+:root[data-theme="dark"] .site-background {
+  display: none;
 }
 
 /* Respect the user's motion preference globally, rather than per-element. */
