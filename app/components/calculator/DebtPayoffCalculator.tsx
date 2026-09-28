@@ -1,0 +1,462 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { monthsToPayoff, paymentForTarget, type PayoffResult } from "@/lib/engine";
+import { formatCurrency, getCurrencyOptions, resolveCurrency, setPreferredCurrency } from "@/lib/locale";
+import {
+  addMonths,
+  buildShareUrl,
+  clampExtraPercent,
+  decodeFormState,
+  encodeFormState,
+  formatMonthYear,
+  interpolate,
+  validateBalance,
+  validatePayment,
+  validateRatePercent,
+  validateTargetDate,
+  type CalculatorFormState,
+  type ValidationError,
+} from "@/lib/calculator";
+import { getStrings, REGIONS, type CalculatorStrings, type RegionKey } from "@/lib/content";
+import { AmortizationTable } from "./AmortizationTable";
+import { PayoffChart } from "./PayoffChart";
+
+interface DebtPayoffCalculatorProps {
+  region: RegionKey;
+}
+
+function defaultState(region: RegionKey): CalculatorFormState {
+  return {
+    mode: "duration",
+    balance: "",
+    ratePercent: "",
+    rateType: "nominal",
+    payment: "",
+    targetDate: "",
+    extraPercent: "0",
+    currency: REGIONS[region].currency,
+  };
+}
+
+function describeError(
+  error: ValidationError,
+  strings: CalculatorStrings,
+  format: (n: number) => string,
+): string {
+  switch (error.code) {
+    case "required":
+      return strings.errorRequired;
+    case "notANumber":
+      return strings.errorNotANumber;
+    case "mustBePositive":
+      return strings.errorMustBePositive;
+    case "tooLarge":
+      return interpolate(strings.errorTooLarge, { max: format(error.max) });
+    case "paymentTooLow":
+      return interpolate(strings.paymentTooLowMessage, { min: format(error.minPayment) });
+    case "dateNotInFuture":
+      return strings.errorDateNotInFuture;
+    case "dateTooFar":
+      return interpolate(strings.errorDateTooFar, { years: String(Math.round(error.maxMonths / 12)) });
+    default:
+      return strings.errorNotANumber;
+  }
+}
+
+/** A blank field just means "no results yet" — only show a message once there's content to react to. */
+function fieldError(result: { ok: true } | { ok: false; error: ValidationError } | null | undefined): ValidationError | undefined {
+  if (!result || result.ok || result.error.code === "required") return undefined;
+  return result.error;
+}
+
+type Computation =
+  | { kind: "error" }
+  | {
+      kind: "ok";
+      payment: number;
+      baseline: PayoffResult;
+      whatIf: PayoffResult | null;
+      extraAmount: number;
+    };
+
+export function DebtPayoffCalculator({ region }: DebtPayoffCalculatorProps) {
+  const content = getStrings(region);
+  const strings = content.calculator;
+  const config = REGIONS[region];
+
+  const [state, setState] = useState<CalculatorFormState>(() => defaultState(region));
+  const [copyStatus, setCopyStatus] = useState<"idle" | "copied">("idle");
+  const [hydrated, setHydrated] = useState(false);
+
+  // Render with the region's default currency first (matches the server), then
+  // layer in any shared-link params and the detected/saved currency after
+  // mount — avoids a hydration mismatch, at the cost of a brief post-load
+  // update for shared links (inherent to a statically-exported site: there's
+  // no per-request server to pre-render a visitor's query string).
+  useEffect(() => {
+    const fromUrl = decodeFormState(window.location.search);
+    // Adopting client-only external state (URL, localStorage) on mount; a
+    // lazy useState initializer would also run during SSR and cause a
+    // hydration mismatch, which is exactly what this effect exists to avoid.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setState((prev) => ({
+      ...prev,
+      ...fromUrl,
+      currency: fromUrl.currency ?? resolveCurrency(),
+    }));
+    setHydrated(true);
+  }, []);
+
+  // Keep the URL in sync so the current result is always a shareable link,
+  // without spamming browser history on every keystroke. Gated on `hydrated`
+  // so this never fires with the pristine default state and briefly
+  // clobbers an incoming shared link's query string before it's been read.
+  useEffect(() => {
+    if (!hydrated) return;
+    const query = encodeFormState(state).toString();
+    const url = query ? `${window.location.pathname}?${query}` : window.location.pathname;
+    window.history.replaceState(null, "", url);
+  }, [state, hydrated]);
+
+  function update<K extends keyof CalculatorFormState>(key: K, value: CalculatorFormState[K]) {
+    setState((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function handleCurrencyChange(currency: string) {
+    update("currency", currency);
+    setPreferredCurrency(currency);
+  }
+
+  const money = (n: number) => formatCurrency(n, state.currency, config.locale);
+
+  const balanceResult = validateBalance(state.balance);
+  const rateResult = validateRatePercent(state.ratePercent);
+  const paymentResult =
+    state.mode === "duration" && balanceResult.ok && rateResult.ok
+      ? validatePayment(state.payment, {
+          balance: balanceResult.value,
+          ratePercent: rateResult.value,
+          rateType: state.rateType,
+        })
+      : null;
+  const targetResult = state.mode === "target" ? validateTargetDate(state.targetDate, new Date()) : null;
+
+  const balanceError = (() => {
+    const e = fieldError(balanceResult);
+    return e ? describeError(e, strings, money) : undefined;
+  })();
+  const rateError = (() => {
+    const e = fieldError(rateResult);
+    return e ? describeError(e, strings, (n) => `${n}%`) : undefined;
+  })();
+  const paymentError = (() => {
+    const e = fieldError(paymentResult);
+    return e ? describeError(e, strings, money) : undefined;
+  })();
+  const targetError = (() => {
+    const e = fieldError(targetResult);
+    return e ? describeError(e, strings, money) : undefined;
+  })();
+
+  const computation: Computation | null = (() => {
+    if (!balanceResult.ok || !rateResult.ok) return null;
+    const balance = balanceResult.value;
+    const ratePercent = rateResult.value;
+    const rateType = state.rateType;
+
+    try {
+      let payment: number;
+      if (state.mode === "duration") {
+        if (!paymentResult || !paymentResult.ok) return null;
+        payment = paymentResult.value;
+      } else {
+        if (!targetResult || !targetResult.ok) return null;
+        payment = paymentForTarget(balance, ratePercent / 100, rateType, targetResult.value);
+        if (!Number.isFinite(payment) || payment <= 0) return { kind: "error" };
+      }
+
+      const baseline = monthsToPayoff(balance, ratePercent / 100, rateType, payment);
+
+      const extraPercent = clampExtraPercent(state.extraPercent);
+      const extraAmount = payment * (extraPercent / 100);
+      const whatIf = extraAmount > 0 ? monthsToPayoff(balance, ratePercent / 100, rateType, payment + extraAmount) : null;
+
+      return { kind: "ok", payment, baseline, whatIf, extraAmount };
+    } catch {
+      return { kind: "error" };
+    }
+  })();
+
+  const currencyOptions = getCurrencyOptions(config.locale);
+
+  async function handleCopyLink() {
+    const base = `${window.location.origin}${window.location.pathname}`;
+    const url = buildShareUrl(base, state);
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopyStatus("copied");
+      setTimeout(() => setCopyStatus("idle"), 2000);
+    } catch {
+      // Clipboard API unavailable (older browser, insecure context) — the
+      // URL is already synced to the address bar, so it's still shareable.
+    }
+  }
+
+  return (
+    <div>
+      {/* Mode tabs */}
+      <div role="tablist" aria-label={strings.resultsHeading} className="flex gap-1 border-b border-black/10 dark:border-white/10">
+        {(["duration", "target"] as const).map((mode) => (
+          <button
+            key={mode}
+            type="button"
+            role="tab"
+            aria-selected={state.mode === mode}
+            onClick={() => update("mode", mode)}
+            className={`-mb-px rounded-t border-b-2 px-4 py-2 text-sm font-medium ${
+              state.mode === mode
+                ? "border-black text-black dark:border-white dark:text-white"
+                : "border-transparent text-black/60 hover:text-black dark:text-white/60 dark:hover:text-white"
+            }`}
+          >
+            {mode === "duration" ? strings.modeDuration : strings.modeTarget}
+          </button>
+        ))}
+      </div>
+
+      {/* Inputs */}
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <Field label={strings.balanceLabel} htmlFor="balance" error={balanceError}>
+          <input
+            id="balance"
+            type="text"
+            inputMode="decimal"
+            value={state.balance}
+            onChange={(e) => update("balance", e.target.value)}
+            className={inputClass}
+            placeholder="7,000"
+          />
+        </Field>
+
+        <Field label={strings.ratePercentLabel} htmlFor="ratePercent" error={rateError}>
+          <input
+            id="ratePercent"
+            type="text"
+            inputMode="decimal"
+            value={state.ratePercent}
+            onChange={(e) => update("ratePercent", e.target.value)}
+            className={inputClass}
+            placeholder="21"
+          />
+        </Field>
+
+        {state.mode === "duration" ? (
+          <Field label={strings.paymentLabel} htmlFor="payment" error={paymentError}>
+            <input
+              id="payment"
+              type="text"
+              inputMode="decimal"
+              value={state.payment}
+              onChange={(e) => update("payment", e.target.value)}
+              className={inputClass}
+              placeholder="200"
+            />
+          </Field>
+        ) : (
+          <Field label={strings.targetDateLabel} htmlFor="targetDate" error={targetError}>
+            <input
+              id="targetDate"
+              type="month"
+              value={state.targetDate}
+              onChange={(e) => update("targetDate", e.target.value)}
+              className={inputClass}
+            />
+          </Field>
+        )}
+
+        <Field label={strings.currencyLabel} htmlFor="currency">
+          <select
+            id="currency"
+            value={state.currency}
+            onChange={(e) => handleCurrencyChange(e.target.value)}
+            className={inputClass}
+          >
+            {currencyOptions.map((opt) => (
+              <option key={opt.code} value={opt.code}>
+                {opt.code} — {opt.name}
+              </option>
+            ))}
+          </select>
+        </Field>
+      </div>
+
+      {/* Advanced: rate type */}
+      <details className="group mt-4">
+        <summary className="cursor-pointer list-none text-sm font-medium text-black/70 hover:text-black dark:text-white/70 dark:hover:text-white">
+          {strings.advancedToggle}
+        </summary>
+        <fieldset className="mt-3 flex flex-col gap-2 sm:flex-row sm:gap-6">
+          <legend className="mb-1 text-sm text-black/60 dark:text-white/60">{strings.rateTypeLabel}</legend>
+          {(["nominal", "effective"] as const).map((rt) => (
+            <label key={rt} className="flex items-center gap-2 text-sm">
+              <input
+                type="radio"
+                name="rateType"
+                checked={state.rateType === rt}
+                onChange={() => update("rateType", rt)}
+              />
+              {rt === "nominal" ? strings.rateTypeNominal : strings.rateTypeEffective}
+            </label>
+          ))}
+        </fieldset>
+      </details>
+
+      {/* Results */}
+      <div className="mt-6">
+        {computation?.kind === "error" && (
+          <p role="alert" className="rounded border border-black/15 bg-black/[.03] px-4 py-3 text-sm text-black/80 dark:border-white/20 dark:bg-white/[.05] dark:text-white/80">
+            {strings.errorTooSlow}
+          </p>
+        )}
+
+        {computation?.kind === "ok" && (
+          <>
+            <h2 className="text-lg font-semibold">{strings.resultsHeading}</h2>
+            <dl className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-4">
+              <ResultStat
+                label={strings.debtFreeDateLabel}
+                value={formatMonthYear(addMonths(new Date(), computation.baseline.months), config.locale)}
+              />
+              <ResultStat label={strings.monthsLabel} value={String(computation.baseline.months)} />
+              <ResultStat label={strings.totalInterestLabel} value={money(computation.baseline.totalInterest)} />
+              <ResultStat label={strings.totalPaidLabel} value={money(computation.baseline.totalPaid)} />
+            </dl>
+            {state.mode === "target" && (
+              <p className="mt-3 text-sm text-black/70 dark:text-white/70">
+                {strings.requiredPaymentLabel}: <strong>{money(computation.payment)}</strong>
+              </p>
+            )}
+
+            {/* What if */}
+            <div className="mt-6">
+              <h3 className="text-sm font-medium text-black/80 dark:text-white/80">{strings.whatIfHeading}</h3>
+              <label htmlFor="extraPercent" className="mt-2 flex items-center gap-3 text-sm">
+                <span className="w-40 shrink-0 text-black/60 dark:text-white/60">{strings.whatIfLabel}</span>
+                <input
+                  id="extraPercent"
+                  type="range"
+                  min={0}
+                  max={50}
+                  step={1}
+                  value={clampExtraPercent(state.extraPercent)}
+                  onChange={(e) => update("extraPercent", e.target.value)}
+                  className="flex-1"
+                />
+                <span className="w-28 shrink-0 text-right tabular-nums">
+                  +{money(computation.extraAmount)}
+                </span>
+              </label>
+              {computation.whatIf && (
+                <p className="mt-2 text-sm">
+                  <strong>{computation.baseline.months - computation.whatIf.months}</strong>{" "}
+                  {strings.whatIfMonthsSaved} &middot;{" "}
+                  <strong>{money(computation.baseline.totalInterest - computation.whatIf.totalInterest)}</strong>{" "}
+                  {strings.whatIfInterestSaved}
+                </p>
+              )}
+            </div>
+
+            {/* Chart */}
+            <div className="mt-6">
+              <PayoffChart
+                title={strings.chartTitle}
+                baselineLabel={strings.chartBaselineLabel}
+                whatIfLabel={strings.chartWhatIfLabel}
+                currency={state.currency}
+                locale={config.locale}
+                baseline={[
+                  { month: 0, balance: balanceResult.ok ? balanceResult.value : 0 },
+                  ...computation.baseline.schedule.map((r) => ({ month: r.month, balance: r.balance })),
+                ]}
+                whatIf={
+                  computation.whatIf
+                    ? [
+                        { month: 0, balance: balanceResult.ok ? balanceResult.value : 0 },
+                        ...computation.whatIf.schedule.map((r) => ({ month: r.month, balance: r.balance })),
+                      ]
+                    : null
+                }
+              />
+            </div>
+
+            {/* Copy link */}
+            <button
+              type="button"
+              onClick={handleCopyLink}
+              className="mt-6 rounded border border-black/20 px-4 py-2 text-sm font-medium hover:bg-black/[.03] dark:border-white/25 dark:hover:bg-white/[.05]"
+            >
+              {copyStatus === "copied" ? strings.copyLinkCopied : strings.copyLinkButton}
+            </button>
+
+            {/* Amortization schedule */}
+            <div className="mt-6">
+              <AmortizationTable
+                schedule={computation.baseline.schedule}
+                currency={state.currency}
+                locale={config.locale}
+                showLabel={strings.scheduleToggleShow}
+                hideLabel={strings.scheduleToggleHide}
+                headers={{
+                  month: strings.scheduleMonthHeader,
+                  payment: strings.schedulePaymentHeader,
+                  interest: strings.scheduleInterestHeader,
+                  principal: strings.schedulePrincipalHeader,
+                  balance: strings.scheduleBalanceHeader,
+                }}
+              />
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const inputClass =
+  "w-full rounded border border-black/20 bg-white px-3 py-2 text-base text-black outline-none focus:border-black/60 dark:border-white/25 dark:bg-black dark:text-white dark:focus:border-white/60";
+
+function Field({
+  label,
+  htmlFor,
+  error,
+  children,
+}: {
+  label: string;
+  htmlFor: string;
+  error?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <label htmlFor={htmlFor} className="mb-1 block text-sm font-medium text-black/80 dark:text-white/80">
+        {label}
+      </label>
+      {children}
+      {error && (
+        <p role="alert" className="mt-1 text-sm text-red-700 dark:text-red-400">
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function ResultStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <dt className="text-xs text-black/60 dark:text-white/60">{label}</dt>
+      <dd className="text-lg font-semibold tabular-nums">{value}</dd>
+    </div>
+  );
+}

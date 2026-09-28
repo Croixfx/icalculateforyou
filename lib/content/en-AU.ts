@@ -1,3 +1,6 @@
+import { buildCalculatorStrings } from "./calculatorStrings";
+import { buildPlaceholderContent } from "./placeholderContent";
+import { REGIONS } from "./regions";
 import type { SiteStrings } from "./types";
 
 export const strings: SiteStrings = {
@@ -15,6 +18,8 @@ export const strings: SiteStrings = {
     subtitle:
       "Build a personalised payoff plan in Australian dollars using the avalanche or snowball method.",
   },
+  calculator: buildCalculatorStrings("GB"),
+  content: buildPlaceholderContent(REGIONS.au, "GB"),
   footer: {
     disclaimer:
       "This calculator is for educational purposes only and does not constitute financial advice.",
