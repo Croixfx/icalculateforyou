@@ -16,7 +16,7 @@ interface HeaderProps {
 export function Header({ strings, homeHref }: HeaderProps) {
   return (
     <header className="border-b border-foreground/10 bg-background/85 backdrop-blur-sm">
-      <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3 px-4 py-4">
+      <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3 px-4 py-4 lg:max-w-5xl xl:max-w-6xl 2xl:max-w-7xl">
         <Link
           href={homeHref}
           prefetch={false}

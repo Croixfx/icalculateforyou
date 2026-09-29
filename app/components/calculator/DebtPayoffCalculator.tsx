@@ -223,8 +223,11 @@ export function DebtPayoffCalculator({ region }: DebtPayoffCalculatorProps) {
 
   return (
     <div>
-      <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-8">
-        {/* Left column: mode tabs, inputs, advanced */}
+      <div className="lg:grid lg:grid-cols-[26rem_1fr] lg:items-start lg:gap-10">
+        {/* Left column: mode tabs, inputs, advanced. Fixed width on large
+            screens (rather than an even split) so the inputs stay a
+            comfortable field width instead of stretching, and the results
+            column below gets the rest of the space instead. */}
         <div>
           <div role="tablist" aria-label={strings.resultsHeading} className="flex gap-1 border-b border-foreground/10">
             {(["duration", "target"] as const).map((mode) => (
@@ -343,20 +346,20 @@ export function DebtPayoffCalculator({ region }: DebtPayoffCalculatorProps) {
           )}
 
           {computation?.kind === "ok" && (
-            <div className="rounded-xl border border-foreground/10 bg-surface p-5 shadow-sm sm:p-6">
+            <div className="rounded-xl border border-foreground/10 bg-surface p-5 shadow-sm sm:p-6 lg:p-8">
               <h2 className="text-sm font-semibold tracking-wide text-foreground/75 uppercase">
                 {strings.resultsHeading}
               </h2>
 
-              <p className="mt-2 text-4xl font-semibold tracking-tight text-accent sm:text-5xl">
+              <p className="mt-2 text-4xl font-semibold tracking-tight text-accent sm:text-5xl lg:text-6xl">
                 {formatMonthYear(addMonths(new Date(), computation.baseline.months), config.locale)}
               </p>
               <p className="mt-1 text-sm text-foreground/75">{strings.debtFreeDateLabel}</p>
 
-              <dl className="mt-5 grid grid-cols-2 gap-4 border-t border-foreground/10 pt-5 sm:grid-cols-3">
+              <dl className="mt-6 grid grid-cols-1 gap-x-8 gap-y-5 border-t border-foreground/10 pt-6 sm:grid-cols-3">
                 <ResultStat label={strings.monthsLabel} value={String(computation.baseline.months)} />
-                <ResultStat label={strings.totalInterestLabel} value={money(computation.baseline.totalInterest)} />
-                <ResultStat label={strings.totalPaidLabel} value={money(computation.baseline.totalPaid)} />
+                <ResultStat label={strings.totalInterestLabel} value={money(computation.baseline.totalInterest)} divided />
+                <ResultStat label={strings.totalPaidLabel} value={money(computation.baseline.totalPaid)} divided />
               </dl>
               {state.mode === "target" && (
                 <p className="mt-4 text-sm text-foreground/75">
@@ -492,11 +495,18 @@ function Field({
   );
 }
 
-function ResultStat({ label, value }: { label: string; value: string }) {
+/**
+ * `divided` draws a left border once stats sit side by side (sm:grid-cols-3)
+ * so each number reads as its own cell instead of running into its
+ * neighbor - on a single mobile column there's nothing to divide from.
+ */
+function ResultStat({ label, value, divided = false }: { label: string; value: string; divided?: boolean }) {
   return (
-    <div>
+    <div className={divided ? "sm:border-l sm:border-foreground/10 sm:pl-6" : undefined}>
       <dt className="text-sm text-foreground/75">{label}</dt>
-      <dd className="mt-0.5 text-2xl font-semibold tabular-nums text-foreground sm:text-[1.75rem]">{value}</dd>
+      <dd className="mt-1 text-2xl font-semibold tabular-nums text-foreground sm:text-[1.75rem] lg:text-3xl">
+        {value}
+      </dd>
     </div>
   );
 }
