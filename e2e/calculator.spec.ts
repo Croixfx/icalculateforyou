@@ -136,10 +136,21 @@ test.describe("debt payoff calculator (US region)", () => {
     await expect(results(page).getByText(/^\$3,9\d\d\.\d\d$/)).toBeVisible();
   });
 
-  test("blank form shows no validation errors and no results panel", async ({ page }) => {
+  test("form is pre-filled with an example so results are visible on load, no scrolling or typing required", async ({
+    page,
+  }) => {
     await page.goto("/us/");
     await expect(page.getByText("Enter a value")).toHaveCount(0);
-    await expect(page.getByText("Results", { exact: true })).toHaveCount(0);
+    await expect(balanceInput(page)).toHaveValue("7000");
+    await expect(page.getByLabel("Interest rate (APR %)")).toHaveValue("21");
+    await expect(page.locator("#payment")).toHaveValue("200");
+    await expect(page.getByText("Results", { exact: true })).toBeVisible();
+
+    // The results panel must be within the initial viewport (no scroll needed).
+    const viewportHeight = page.viewportSize()?.height ?? 0;
+    const box = await page.getByText("Results", { exact: true }).boundingBox();
+    expect(box).not.toBeNull();
+    expect(box!.y + box!.height).toBeLessThanOrEqual(viewportHeight);
   });
 });
 

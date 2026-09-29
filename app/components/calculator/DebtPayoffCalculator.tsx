@@ -26,13 +26,17 @@ interface DebtPayoffCalculatorProps {
   region: RegionKey;
 }
 
+// Pre-filled with an illustrative example (not blank) so results are
+// visible immediately on load, without the visitor having to type
+// anything first or scroll to find them. Any of these are one edit away
+// from reflecting the visitor's own numbers.
 function defaultState(region: RegionKey): CalculatorFormState {
   return {
     mode: "duration",
-    balance: "",
-    ratePercent: "",
+    balance: "7000",
+    ratePercent: "21",
     rateType: "nominal",
-    payment: "",
+    payment: "200",
     targetDate: "",
     extraPercent: "0",
     currency: REGIONS[region].currency,
@@ -219,124 +223,126 @@ export function DebtPayoffCalculator({ region }: DebtPayoffCalculatorProps) {
 
   return (
     <div>
-      {/* Mode tabs */}
-      <div role="tablist" aria-label={strings.resultsHeading} className="flex gap-1 border-b border-foreground/10">
-        {(["duration", "target"] as const).map((mode) => (
-          <button
-            key={mode}
-            type="button"
-            role="tab"
-            aria-selected={state.mode === mode}
-            onClick={() => update("mode", mode)}
-            className={`-mb-px flex min-h-11 items-center border-b-2 px-4 text-sm font-medium transition-colors outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
-              state.mode === mode
-                ? "border-accent text-foreground"
-                : "border-transparent text-foreground/75 hover:text-foreground"
-            }`}
-          >
-            {mode === "duration" ? strings.modeDuration : strings.modeTarget}
-          </button>
-        ))}
-      </div>
-
-      {/* Inputs */}
-      <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        <Field label={strings.balanceLabel} htmlFor="balance" error={balanceError}>
-          <input
-            id="balance"
-            type="text"
-            inputMode="decimal"
-            value={state.balance}
-            onChange={(e) => update("balance", e.target.value)}
-            className={inputClass}
-            placeholder="7,000"
-          />
-        </Field>
-
-        <Field label={strings.ratePercentLabel} htmlFor="ratePercent" error={rateError}>
-          <input
-            id="ratePercent"
-            type="text"
-            inputMode="decimal"
-            value={state.ratePercent}
-            onChange={(e) => update("ratePercent", e.target.value)}
-            className={inputClass}
-            placeholder="21"
-          />
-        </Field>
-
-        {state.mode === "duration" ? (
-          <Field label={strings.paymentLabel} htmlFor="payment" error={paymentError}>
-            <input
-              id="payment"
-              type="text"
-              inputMode="decimal"
-              value={state.payment}
-              onChange={(e) => update("payment", e.target.value)}
-              className={inputClass}
-              placeholder="200"
-            />
-          </Field>
-        ) : (
-          <Field label={strings.targetDateLabel} htmlFor="targetDate" error={targetError}>
-            <input
-              id="targetDate"
-              type="month"
-              value={state.targetDate}
-              onChange={(e) => update("targetDate", e.target.value)}
-              className={inputClass}
-            />
-          </Field>
-        )}
-
-        <Field label={strings.currencyLabel} htmlFor="currency">
-          <select
-            id="currency"
-            value={state.currency}
-            onChange={(e) => handleCurrencyChange(e.target.value)}
-            className={inputClass}
-          >
-            {currencyOptions.map((opt) => (
-              <option key={opt.code} value={opt.code}>
-                {opt.code} — {opt.name}
-              </option>
+      <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-8">
+        {/* Left column: mode tabs, inputs, advanced */}
+        <div>
+          <div role="tablist" aria-label={strings.resultsHeading} className="flex gap-1 border-b border-foreground/10">
+            {(["duration", "target"] as const).map((mode) => (
+              <button
+                key={mode}
+                type="button"
+                role="tab"
+                aria-selected={state.mode === mode}
+                onClick={() => update("mode", mode)}
+                className={`-mb-px flex min-h-11 items-center border-b-2 px-4 text-sm font-medium transition-colors outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
+                  state.mode === mode
+                    ? "border-accent text-foreground"
+                    : "border-transparent text-foreground/75 hover:text-foreground"
+                }`}
+              >
+                {mode === "duration" ? strings.modeDuration : strings.modeTarget}
+              </button>
             ))}
-          </select>
-        </Field>
-      </div>
+          </div>
 
-      {/* Advanced: rate type */}
-      <details className="group mt-5">
-        <summary className="flex min-h-11 w-fit cursor-pointer list-none items-center text-sm font-medium text-foreground/75 transition-colors hover:text-foreground">
-          {strings.advancedToggle}
-        </summary>
-        <fieldset className="mt-2 flex flex-col gap-1 sm:flex-row sm:gap-6">
-          <legend className="mb-1 text-sm text-foreground/75">{strings.rateTypeLabel}</legend>
-          {(["nominal", "effective"] as const).map((rt) => (
-            <label key={rt} className="flex min-h-11 items-center gap-2 text-sm">
+          {/* Inputs */}
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <Field label={strings.balanceLabel} htmlFor="balance" error={balanceError}>
               <input
-                type="radio"
-                name="rateType"
-                checked={state.rateType === rt}
-                onChange={() => update("rateType", rt)}
-                className="h-4 w-4 accent-accent"
+                id="balance"
+                type="text"
+                inputMode="decimal"
+                value={state.balance}
+                onChange={(e) => update("balance", e.target.value)}
+                className={inputClass}
+                placeholder="7,000"
               />
-              {rt === "nominal" ? strings.rateTypeNominal : strings.rateTypeEffective}
-            </label>
-          ))}
-        </fieldset>
-      </details>
+            </Field>
 
-      {/* Results */}
-      <div className="mt-6">
-        {computation?.kind === "error" && (
-          <p role="alert" className="rounded-lg border border-error/30 bg-error-bg px-4 py-3 text-sm font-medium text-error">
-            {strings.errorTooSlow}
-          </p>
-        )}
+            <Field label={strings.ratePercentLabel} htmlFor="ratePercent" error={rateError}>
+              <input
+                id="ratePercent"
+                type="text"
+                inputMode="decimal"
+                value={state.ratePercent}
+                onChange={(e) => update("ratePercent", e.target.value)}
+                className={inputClass}
+                placeholder="21"
+              />
+            </Field>
 
-        {computation?.kind === "ok" && (
-          <>
+            {state.mode === "duration" ? (
+              <Field label={strings.paymentLabel} htmlFor="payment" error={paymentError}>
+                <input
+                  id="payment"
+                  type="text"
+                  inputMode="decimal"
+                  value={state.payment}
+                  onChange={(e) => update("payment", e.target.value)}
+                  className={inputClass}
+                  placeholder="200"
+                />
+              </Field>
+            ) : (
+              <Field label={strings.targetDateLabel} htmlFor="targetDate" error={targetError}>
+                <input
+                  id="targetDate"
+                  type="month"
+                  value={state.targetDate}
+                  onChange={(e) => update("targetDate", e.target.value)}
+                  className={inputClass}
+                />
+              </Field>
+            )}
+
+            <Field label={strings.currencyLabel} htmlFor="currency">
+              <select
+                id="currency"
+                value={state.currency}
+                onChange={(e) => handleCurrencyChange(e.target.value)}
+                className={inputClass}
+              >
+                {currencyOptions.map((opt) => (
+                  <option key={opt.code} value={opt.code}>
+                    {opt.code} — {opt.name}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          </div>
+
+          {/* Advanced: rate type */}
+          <details className="group mt-5">
+            <summary className="flex min-h-11 w-fit cursor-pointer list-none items-center text-sm font-medium text-foreground/75 transition-colors hover:text-foreground">
+              {strings.advancedToggle}
+            </summary>
+            <fieldset className="mt-2 flex flex-col gap-1 sm:flex-row sm:gap-6">
+              <legend className="mb-1 text-sm text-foreground/75">{strings.rateTypeLabel}</legend>
+              {(["nominal", "effective"] as const).map((rt) => (
+                <label key={rt} className="flex min-h-11 items-center gap-2 text-sm">
+                  <input
+                    type="radio"
+                    name="rateType"
+                    checked={state.rateType === rt}
+                    onChange={() => update("rateType", rt)}
+                    className="h-4 w-4 accent-accent"
+                  />
+                  {rt === "nominal" ? strings.rateTypeNominal : strings.rateTypeEffective}
+                </label>
+              ))}
+            </fieldset>
+          </details>
+        </div>
+
+        {/* Right column: primary results, alongside the inputs so they never require scrolling past the form to see */}
+        <div className="mt-6 lg:mt-0">
+          {computation?.kind === "error" && (
+            <p role="alert" className="rounded-lg border border-error/30 bg-error-bg px-4 py-3 text-sm font-medium text-error">
+              {strings.errorTooSlow}
+            </p>
+          )}
+
+          {computation?.kind === "ok" && (
             <div className="rounded-xl border border-foreground/10 bg-surface p-5 shadow-sm sm:p-6">
               <h2 className="text-sm font-semibold tracking-wide text-foreground/75 uppercase">
                 {strings.resultsHeading}
@@ -359,96 +365,100 @@ export function DebtPayoffCalculator({ region }: DebtPayoffCalculatorProps) {
                 </p>
               )}
             </div>
-
-            {/* What if */}
-            <div className="mt-6 rounded-xl border border-foreground/10 p-5 sm:p-6">
-              <h3 className="text-sm font-medium text-foreground">{strings.whatIfHeading}</h3>
-              <div className="mt-3 text-sm">
-                <div className="flex items-baseline justify-between gap-3">
-                  <label htmlFor="extraPercent" className="text-foreground/75">
-                    {strings.whatIfLabel}
-                  </label>
-                  <span className="font-medium tabular-nums text-foreground">
-                    +{money(computation.extraAmount)}
-                  </span>
-                </div>
-                <input
-                  id="extraPercent"
-                  type="range"
-                  min={0}
-                  max={50}
-                  step={1}
-                  value={clampExtraPercent(state.extraPercent)}
-                  onChange={(e) => update("extraPercent", e.target.value)}
-                  className="mt-2 h-11 w-full rounded accent-accent outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-                />
-              </div>
-              {computation.whatIf && (
-                <p className="mt-3 text-sm text-foreground/75">
-                  <strong className="font-semibold text-foreground">
-                    {computation.baseline.months - computation.whatIf.months}
-                  </strong>{" "}
-                  {strings.whatIfMonthsSaved} &middot;{" "}
-                  <strong className="font-semibold text-foreground">
-                    {money(computation.baseline.totalInterest - computation.whatIf.totalInterest)}
-                  </strong>{" "}
-                  {strings.whatIfInterestSaved}
-                </p>
-              )}
-            </div>
-
-            {/* Chart */}
-            <div className="mt-6">
-              <PayoffChart
-                title={strings.chartTitle}
-                baselineLabel={strings.chartBaselineLabel}
-                whatIfLabel={strings.chartWhatIfLabel}
-                currency={state.currency}
-                locale={config.locale}
-                baseline={[
-                  { month: 0, balance: balanceResult.ok ? balanceResult.value : 0 },
-                  ...computation.baseline.schedule.map((r) => ({ month: r.month, balance: r.balance })),
-                ]}
-                whatIf={
-                  computation.whatIf
-                    ? [
-                        { month: 0, balance: balanceResult.ok ? balanceResult.value : 0 },
-                        ...computation.whatIf.schedule.map((r) => ({ month: r.month, balance: r.balance })),
-                      ]
-                    : null
-                }
-              />
-            </div>
-
-            {/* Copy link */}
-            <button
-              type="button"
-              onClick={handleCopyLink}
-              className="mt-6 flex min-h-11 items-center rounded-lg border border-foreground/20 px-4 text-sm font-medium text-foreground outline-none transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-            >
-              {copyStatus === "copied" ? strings.copyLinkCopied : strings.copyLinkButton}
-            </button>
-
-            {/* Amortization schedule */}
-            <div className="mt-6">
-              <AmortizationTable
-                schedule={computation.baseline.schedule}
-                currency={state.currency}
-                locale={config.locale}
-                showLabel={strings.scheduleToggleShow}
-                hideLabel={strings.scheduleToggleHide}
-                headers={{
-                  month: strings.scheduleMonthHeader,
-                  payment: strings.schedulePaymentHeader,
-                  interest: strings.scheduleInterestHeader,
-                  principal: strings.schedulePrincipalHeader,
-                  balance: strings.scheduleBalanceHeader,
-                }}
-              />
-            </div>
-          </>
-        )}
+          )}
+        </div>
       </div>
+
+      {/* Below the fold: what-if, chart, share, schedule — full width */}
+      {computation?.kind === "ok" && (
+        <div className="mt-6">
+          {/* What if */}
+          <div className="rounded-xl border border-foreground/10 p-5 sm:p-6">
+            <h3 className="text-sm font-medium text-foreground">{strings.whatIfHeading}</h3>
+            <div className="mt-3 text-sm">
+              <div className="flex items-baseline justify-between gap-3">
+                <label htmlFor="extraPercent" className="text-foreground/75">
+                  {strings.whatIfLabel}
+                </label>
+                <span className="font-medium tabular-nums text-foreground">+{money(computation.extraAmount)}</span>
+              </div>
+              <input
+                id="extraPercent"
+                type="range"
+                min={0}
+                max={50}
+                step={1}
+                value={clampExtraPercent(state.extraPercent)}
+                onChange={(e) => update("extraPercent", e.target.value)}
+                className="mt-2 h-11 w-full rounded accent-accent outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+              />
+            </div>
+            {computation.whatIf && (
+              <p className="mt-3 text-sm text-foreground/75">
+                <strong className="font-semibold text-foreground">
+                  {computation.baseline.months - computation.whatIf.months}
+                </strong>{" "}
+                {strings.whatIfMonthsSaved} &middot;{" "}
+                <strong className="font-semibold text-foreground">
+                  {money(computation.baseline.totalInterest - computation.whatIf.totalInterest)}
+                </strong>{" "}
+                {strings.whatIfInterestSaved}
+              </p>
+            )}
+          </div>
+
+          {/* Chart */}
+          <div className="mt-6">
+            <PayoffChart
+              title={strings.chartTitle}
+              baselineLabel={strings.chartBaselineLabel}
+              whatIfLabel={strings.chartWhatIfLabel}
+              xAxisLabel={strings.chartXAxisLabel}
+              currency={state.currency}
+              locale={config.locale}
+              baseline={[
+                { month: 0, balance: balanceResult.ok ? balanceResult.value : 0 },
+                ...computation.baseline.schedule.map((r) => ({ month: r.month, balance: r.balance })),
+              ]}
+              whatIf={
+                computation.whatIf
+                  ? [
+                      { month: 0, balance: balanceResult.ok ? balanceResult.value : 0 },
+                      ...computation.whatIf.schedule.map((r) => ({ month: r.month, balance: r.balance })),
+                    ]
+                  : null
+              }
+            />
+          </div>
+
+          {/* Copy link */}
+          <button
+            type="button"
+            onClick={handleCopyLink}
+            className="mt-6 flex min-h-11 items-center rounded-lg border border-foreground/20 px-4 text-sm font-medium text-foreground outline-none transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          >
+            {copyStatus === "copied" ? strings.copyLinkCopied : strings.copyLinkButton}
+          </button>
+
+          {/* Amortization schedule */}
+          <div className="mt-6">
+            <AmortizationTable
+              schedule={computation.baseline.schedule}
+              currency={state.currency}
+              locale={config.locale}
+              showLabel={strings.scheduleToggleShow}
+              hideLabel={strings.scheduleToggleHide}
+              headers={{
+                month: strings.scheduleMonthHeader,
+                payment: strings.schedulePaymentHeader,
+                interest: strings.scheduleInterestHeader,
+                principal: strings.schedulePrincipalHeader,
+                balance: strings.scheduleBalanceHeader,
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
