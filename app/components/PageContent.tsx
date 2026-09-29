@@ -11,7 +11,7 @@ interface PageContentProps {
 export function PageContent({ content }: PageContentProps) {
   return (
     <div className="mt-14">
-      <article className="max-w-prose space-y-12">
+      <article className="max-w-3xl space-y-12">
         <section>
           <h2 className="text-xl font-semibold tracking-tight">{content.howInterestWorksHeading}</h2>
           <p className="mt-3 text-base leading-relaxed text-foreground/75 sm:text-lg">
