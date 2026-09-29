@@ -4,7 +4,7 @@ import { expect, test } from "@playwright/test";
 const PAGES = ["/", "/us/", "/uk/", "/ca/", "/au/"];
 
 for (const path of PAGES) {
-  test(`${path} has no automatic accessibility violations (empty form)`, async ({ page }) => {
+  test(`${path} has no automatic accessibility violations (default pre-filled state)`, async ({ page }) => {
     await page.goto(path);
     await page.waitForLoadState("networkidle");
 

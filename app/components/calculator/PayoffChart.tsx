@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { formatCurrency } from "@/lib/locale";
 
 export interface ChartPoint {
@@ -16,14 +16,16 @@ interface PayoffChartProps {
   title: string;
   baselineLabel: string;
   whatIfLabel: string;
+  xAxisLabel: string;
 }
 
 const WIDTH = 600;
-const HEIGHT = 240;
-const PADDING = { top: 16, right: 16, bottom: 28, left: 60 };
+const HEIGHT = 320;
+const PADDING = { top: 16, right: 16, bottom: 40, left: 64 };
 const PLOT_WIDTH = WIDTH - PADDING.left - PADDING.right;
 const PLOT_HEIGHT = HEIGHT - PADDING.top - PADDING.bottom;
-const TICK_COUNT = 4;
+const TICK_COUNT = 6;
+const X_TICK_COUNT = 6;
 
 function niceTicks(max: number, count: number): number[] {
   if (max <= 0) return [0];
@@ -40,6 +42,22 @@ function niceTicks(max: number, count: number): number[] {
   return ticks;
 }
 
+/**
+ * Deterministic, currency-symbol-free compact number formatting (e.g.
+ * "7K", "1.5K") — used only for the chart's tick labels before hydration,
+ * as a hydration-safe stand-in for Intl's locale-formatted version. Plain
+ * arithmetic and string formatting, so it can never differ between Node
+ * and a browser the way Intl's compact notation has.
+ */
+function plainCompact(n: number): string {
+  if (n >= 1000) {
+    const thousands = n / 1000;
+    const rounded = Math.round(thousands * 10) / 10;
+    return `${rounded % 1 === 0 ? rounded.toFixed(0) : rounded.toFixed(1)}K`;
+  }
+  return Math.round(n).toString();
+}
+
 /** Pads a series with trailing zero-balance points so both lines share an x-domain. */
 function padSeries(points: ChartPoint[], throughMonth: number): ChartPoint[] {
   const last = points.at(-1);
@@ -51,8 +69,24 @@ function pathFor(points: ChartPoint[], xScale: (m: number) => number, yScale: (b
   return points.map((p, i) => `${i === 0 ? "M" : "L"} ${xScale(p.month).toFixed(2)} ${yScale(p.balance).toFixed(2)}`).join(" ");
 }
 
-export function PayoffChart({ baseline, whatIf, currency, locale, title, baselineLabel, whatIfLabel }: PayoffChartProps) {
+export function PayoffChart({ baseline, whatIf, currency, locale, title, baselineLabel, whatIfLabel, xAxisLabel }: PayoffChartProps) {
   const [hoverMonth, setHoverMonth] = useState<number | null>(null);
+
+  // Intl's compact-notation output for the exact same input has now been
+  // caught differing between Node (SSR/build) and Chromium (client) twice —
+  // once in trailing-zero trimming ("$7.0K" vs "$7K"), once in the unit
+  // suffix's letter case for en-GB specifically ("£1K" vs "£1k"). The chart
+  // renders in the initial server-rendered HTML (results are pre-filled by
+  // default now), so any such divergence is a hydration mismatch. Rather
+  // than keep patching individual locale/rounding cases as they turn up,
+  // tick labels use a plain, currency-symbol-free fallback (identical on
+  // every engine, no Intl involved) until mounted, then switch to the real
+  // formatter — the same pattern already used for the currency dropdown.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
 
   const maxMonth = Math.max(baseline.at(-1)?.month ?? 0, whatIf?.at(-1)?.month ?? 0, 1);
   const maxBalance = Math.max(baseline[0]?.balance ?? 0, 1);
@@ -65,16 +99,18 @@ export function PayoffChart({ baseline, whatIf, currency, locale, title, baselin
 
   const yTicks = niceTicks(maxBalance, TICK_COUNT).filter((t) => t <= maxBalance * 1.001);
 
-  const tickFormatter = useMemo(
+  const intlTickFormatter = useMemo(
     () =>
       new Intl.NumberFormat(locale, {
         style: "currency",
         currency,
         notation: "compact",
+        minimumFractionDigits: 0,
         maximumFractionDigits: 1,
       }),
     [locale, currency],
   );
+  const tickFormatter = { format: (n: number) => (mounted ? intlTickFormatter.format(n) : plainCompact(n)) };
 
   function balanceAt(points: ChartPoint[], month: number): number {
     const clamped = Math.max(0, Math.min(month, points.at(-1)?.month ?? 0));
@@ -111,7 +147,7 @@ export function PayoffChart({ baseline, whatIf, currency, locale, title, baselin
           </ul>
         )}
       </div>
-      <div className="mt-2 h-56 w-full" style={{ background: "var(--chart-surface)" }}>
+      <div className="mt-2 h-72 w-full" style={{ background: "var(--chart-surface)" }}>
         <svg
           viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
           preserveAspectRatio="none"
@@ -164,6 +200,25 @@ export function PayoffChart({ baseline, whatIf, currency, locale, title, baselin
             stroke="var(--chart-axis)"
             strokeWidth={1}
           />
+
+          {/* X-axis month labels */}
+          {niceTicks(maxMonth, X_TICK_COUNT)
+            .filter((t) => t > 0 && t <= maxMonth * 1.001)
+            .map((t) => (
+              <text
+                key={`x-${t}`}
+                x={xScale(t)}
+                y={HEIGHT - PADDING.bottom + 18}
+                textAnchor="middle"
+                fontSize={11}
+                fill="var(--chart-text-muted)"
+              >
+                {Math.round(t)}
+              </text>
+            ))}
+          <text x={PADDING.left} y={HEIGHT - 4} fontSize={10} fill="var(--chart-text-muted)">
+            {xAxisLabel}
+          </text>
 
           {/* Series lines */}
           <path
