@@ -21,15 +21,19 @@
   --error: #b3261e;
   --error-bg: #fbeceb;
 
-  /* Chart tokens (dataviz skill reference palette, adapted to this theme) */
+  /* Chart tokens (dataviz skill reference palette, adapted to this theme).
+     Series colors are a teal + amber pair drawn from the site's own accent
+     family (rather than an unrelated blue/orange) so the whole page reads
+     as one deliberate color scheme; validated with the dataviz skill's
+     palette checker for lightness, chroma, and colorblind-safe separation. */
   --chart-surface: #fcfcfb;
   --chart-text-primary: #0b0b0b;
   --chart-text-secondary: #52514e;
   --chart-text-muted: #898781;
   --chart-gridline: #e1e0d9;
   --chart-axis: #c3c2b7;
-  --chart-series-1: #2a78d6; /* baseline / "Your plan" */
-  --chart-series-2: #eb6834; /* "what if" scenario */
+  --chart-series-1: #0891b2; /* baseline / "Your plan" */
+  --chart-series-2: #c1791f; /* "what if" scenario */
 }
 
 @theme inline {
@@ -62,8 +66,8 @@
   --chart-text-muted: #898781;
   --chart-gridline: #2c2c2a;
   --chart-axis: #383835;
-  --chart-series-1: #3987e5;
-  --chart-series-2: #d95926;
+  --chart-series-1: #2ea0c2;
+  --chart-series-2: #c98330;
 }
 
 /*
