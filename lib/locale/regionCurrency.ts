@@ -59,6 +59,7 @@ export const REGION_TO_CURRENCY: Record<string, string> = {
   KE: "KES",
   GH: "GHS",
   MA: "MAD",
+  RW: "RWF",
   IN: "INR",
   PK: "PKR",
   BD: "BDT",

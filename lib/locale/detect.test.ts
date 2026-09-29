@@ -54,6 +54,11 @@ describe("detectLocale", () => {
     mockBrowser("en-XX");
     expect(detectLocale().currency).toBe("USD");
   });
+
+  it("maps a Rwandan locale (rw-RW) to RWF", () => {
+    mockBrowser("rw-RW");
+    expect(detectLocale().currency).toBe("RWF");
+  });
 });
 
 describe("manual currency override", () => {
