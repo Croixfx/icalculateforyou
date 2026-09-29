@@ -361,7 +361,7 @@ export function DebtPayoffCalculator({ region }: DebtPayoffCalculatorProps) {
               </p>
               <p className="mt-1 text-sm text-foreground/75">{strings.debtFreeDateLabel}</p>
 
-              <dl className="mt-6 grid grid-cols-1 gap-x-8 gap-y-5 border-t border-foreground/10 pt-6 sm:grid-cols-3">
+              <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-5 border-t border-foreground/10 pt-6">
                 <ResultStat label={strings.monthsLabel} value={String(computation.baseline.months)} />
                 <ResultStat label={strings.totalInterestLabel} value={money(computation.baseline.totalInterest)} divided />
                 <ResultStat label={strings.totalPaidLabel} value={money(computation.baseline.totalPaid)} divided />
@@ -501,15 +501,19 @@ function Field({
 }
 
 /**
- * `divided` draws a left border once stats sit side by side (sm:grid-cols-3)
- * so each number reads as its own cell instead of running into its
- * neighbor - on a single mobile column there's nothing to divide from.
+ * Each stat is a flex item sized to its own content (not a fixed-width
+ * grid column), so a short "55" doesn't get stretched into a wide cell
+ * with empty space, and a long currency amount always gets exactly the
+ * room it needs rather than being squeezed into an equal third. `divided`
+ * draws a left border once stats sit side by side (they naturally wrap to
+ * their own row below sm width) so each number reads as its own value
+ * instead of running into its neighbor.
  */
 function ResultStat({ label, value, divided = false }: { label: string; value: string; divided?: boolean }) {
   return (
     <div className={divided ? "sm:border-l sm:border-foreground/10 sm:pl-6" : undefined}>
       <dt className="text-sm text-foreground/75">{label}</dt>
-      <dd className="mt-1 text-2xl font-semibold tabular-nums text-foreground break-words sm:text-[1.75rem] lg:text-3xl">
+      <dd className="mt-1 text-2xl font-semibold tabular-nums text-nowrap text-foreground sm:text-[1.75rem] lg:text-3xl">
         {value}
       </dd>
     </div>
