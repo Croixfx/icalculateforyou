@@ -23,7 +23,7 @@ test("/us/ has no violations once filled in with results, chart, and schedule sh
   await page.getByLabel("Interest rate (APR %)").fill("21");
   await page.locator("#payment").fill("200");
   await page.getByLabel("Extra monthly payment").fill("15");
-  await page.getByText("Show amortization schedule").click();
+  // Amortization schedule is open by default, so it's already part of this check.
   await page.waitForTimeout(200);
 
   const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();

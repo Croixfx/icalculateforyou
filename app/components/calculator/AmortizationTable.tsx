@@ -18,7 +18,7 @@ interface AmortizationTableProps {
 
 export function AmortizationTable({ schedule, currency, locale, showLabel, hideLabel, headers }: AmortizationTableProps) {
   return (
-    <details className="group">
+    <details className="group" open>
       <summary className="flex min-h-11 w-fit cursor-pointer list-none items-center rounded-lg border border-foreground/20 px-4 text-sm font-medium text-foreground outline-none transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
         <span className="group-open:hidden">{showLabel}</span>
         <span className="hidden group-open:inline">{hideLabel}</span>

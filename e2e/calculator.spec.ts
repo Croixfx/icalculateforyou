@@ -85,18 +85,19 @@ test.describe("debt payoff calculator (US region)", () => {
     await expect(chart.locator("path")).toHaveCount(2);
   });
 
-  test("amortization schedule is collapsed by default and expands on click", async ({ page }) => {
+  test("amortization schedule is open by default and can be collapsed", async ({ page }) => {
     await page.goto("/us/");
     await balanceInput(page).fill("7000");
     await page.getByLabel("Interest rate (APR %)").fill("21");
     await page.locator("#payment").fill("200");
 
     const table = page.locator("table");
-    await expect(table).toBeHidden();
-
-    await page.getByText("Show amortization schedule").click();
     await expect(table).toBeVisible();
     await expect(page.getByText("Hide amortization schedule")).toBeVisible();
+
+    await page.getByText("Hide amortization schedule").click();
+    await expect(table).toBeHidden();
+    await expect(page.getByText("Show amortization schedule")).toBeVisible();
   });
 
   test("currency selector changes the displayed currency", async ({ page }) => {
