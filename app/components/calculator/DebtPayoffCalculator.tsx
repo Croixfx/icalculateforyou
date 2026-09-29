@@ -337,8 +337,13 @@ export function DebtPayoffCalculator({ region }: DebtPayoffCalculatorProps) {
           </details>
         </div>
 
-        {/* Right column: primary results, alongside the inputs so they never require scrolling past the form to see */}
-        <div className="mt-6 lg:mt-0">
+        {/* Right column: primary results, alongside the inputs so they never require scrolling past the form to see.
+            Capped at lg:max-w-2xl - the grid column itself keeps growing on
+            large screens, but past that width the card's own content (a
+            handful of short numbers) stops filling it and starts looking
+            like it's floating in empty space, so the card itself stays a
+            content-appropriate width instead of stretching edge to edge. */}
+        <div className="mt-6 lg:mt-0 lg:max-w-2xl">
           {computation?.kind === "error" && (
             <p role="alert" className="rounded-lg border border-error/30 bg-error-bg px-4 py-3 text-sm font-medium text-error">
               {strings.errorTooSlow}
@@ -504,7 +509,7 @@ function ResultStat({ label, value, divided = false }: { label: string; value: s
   return (
     <div className={divided ? "sm:border-l sm:border-foreground/10 sm:pl-6" : undefined}>
       <dt className="text-sm text-foreground/75">{label}</dt>
-      <dd className="mt-1 text-2xl font-semibold tabular-nums text-foreground sm:text-[1.75rem] lg:text-3xl">
+      <dd className="mt-1 text-2xl font-semibold tabular-nums text-foreground break-words sm:text-[1.75rem] lg:text-3xl">
         {value}
       </dd>
     </div>
