@@ -25,7 +25,7 @@ export default function Home() {
       <div className="mt-8">
         <DebtPayoffCalculator region="default" />
       </div>
-      <PageContent region="default" content={strings.content} />
+      <PageContent content={strings.content} />
     </SiteChrome>
   );
 }

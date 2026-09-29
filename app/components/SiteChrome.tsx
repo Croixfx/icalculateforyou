@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import { getStrings, type RegionKey } from "@/lib/content";
-import { AdSlot } from "./AdSlot";
 import { Footer } from "./Footer";
 import { Header } from "./Header";
 
@@ -10,15 +9,9 @@ interface SiteChromeProps {
 }
 
 /**
- * Shared page chrome (header, footer, ad slot) used by every region
- * section. Only the strings passed in change; the structure stays the same
- * everywhere so the site feels consistent across currencies and locales.
- *
- * No ad slot runs above `children` — every page puts the calculator first,
- * and ads must never sit above it or between its inputs and results. Pages
- * that want an ad slot partway through their content (below the calculator,
- * within the article body) render <AdSlot> themselves; this wrapper only
- * owns the one guaranteed to be safe: after everything, above the footer.
+ * Shared page chrome (header, footer) used by every region section. Only
+ * the strings passed in change; the structure stays the same everywhere so
+ * the site feels consistent across currencies and locales.
  */
 export function SiteChrome({ region, children }: SiteChromeProps) {
   const strings = getStrings(region);
@@ -27,8 +20,9 @@ export function SiteChrome({ region, children }: SiteChromeProps) {
   return (
     <>
       <Header strings={strings} homeHref={homeHref} />
-      <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:py-12">{children}</main>
-      <AdSlot id={`ad-bottom-${region}`} className="mx-auto mb-8 max-w-4xl" />
+      <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:py-12 lg:max-w-5xl xl:max-w-6xl 2xl:max-w-7xl">
+        {children}
+      </main>
       <Footer strings={strings} />
     </>
   );

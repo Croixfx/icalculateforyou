@@ -14,7 +14,7 @@ export default function UkHome() {
       <div className="mt-8">
         <DebtPayoffCalculator region="uk" />
       </div>
-      <PageContent region="uk" content={strings.content} />
+      <PageContent content={strings.content} />
     </>
   );
 }

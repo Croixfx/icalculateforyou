@@ -14,7 +14,7 @@ export default function AuHome() {
       <div className="mt-8">
         <DebtPayoffCalculator region="au" />
       </div>
-      <PageContent region="au" content={strings.content} />
+      <PageContent content={strings.content} />
     </>
   );
 }

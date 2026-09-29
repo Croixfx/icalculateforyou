@@ -14,7 +14,7 @@ export default function CaHome() {
       <div className="mt-8">
         <DebtPayoffCalculator region="ca" />
       </div>
-      <PageContent region="ca" content={strings.content} />
+      <PageContent content={strings.content} />
     </>
   );
 }

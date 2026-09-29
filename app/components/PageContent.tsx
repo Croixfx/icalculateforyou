@@ -1,23 +1,16 @@
-import type { ContentStrings, RegionKey } from "@/lib/content";
-import { AdSlot } from "./AdSlot";
+import type { ContentStrings } from "@/lib/content";
 
 interface PageContentProps {
-  region: RegionKey;
   content: ContentStrings;
 }
 
 /**
  * SEO/explainer content below the calculator: how interest works, how to
- * use the calculator, snowball vs. avalanche, and an FAQ. Two ad slots live
- * in here — one right below the calculator's results, one further down
- * within the article body — never above the calculator and never between
- * its inputs and results (SiteChrome owns the third, page-bottom slot).
+ * use the calculator, snowball vs. avalanche, and an FAQ.
  */
-export function PageContent({ region, content }: PageContentProps) {
+export function PageContent({ content }: PageContentProps) {
   return (
     <div className="mt-14">
-      <AdSlot id={`ad-mid-${region}`} className="mb-12" />
-
       <article className="max-w-prose space-y-12">
         <section>
           <h2 className="text-xl font-semibold tracking-tight">{content.howInterestWorksHeading}</h2>
@@ -38,8 +31,6 @@ export function PageContent({ region, content }: PageContentProps) {
               page that doesn't exist yet. Re-add this link (and drop this
               comment) once that page ships — an internal link must never 404. */}
         </section>
-
-        <AdSlot id={`ad-content-${region}`} />
 
         <section>
           <h2 className="text-xl font-semibold tracking-tight">{content.faqHeading}</h2>
