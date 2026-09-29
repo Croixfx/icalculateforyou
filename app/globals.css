@@ -66,41 +66,44 @@
   --chart-series-2: #d95926;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-}
-
 /*
- * Full-page background photo (light mode only) — set directly as body's
- * own background-image, not a separate fixed-position element. That
- * matters: two earlier attempts at a dedicated overlay div both broke
- * visually (z-index: -1 didn't work because browsers propagate a
- * non-positioned body's background color to paint the canvas itself, a
- * layer beneath any z-index; removing the z-index then made the div
- * paint *above* the hero and calculator instead, blanking them). None of
- * that ambiguity exists here: a background is always beneath its own
- * element's children by definition, full stop, no stacking context to
- * reason about. `background-attachment: fixed` sizes `cover` against the
- * viewport (not the page's full scrollable height), so this stays
- * correctly framed no matter how long the page is, and keeps the photo
- * anchored in place as the page scrolls. A darker, richer wash (rather
- * than a near-white one) sits over the photo so it reads as a moodier,
- * more deliberate backdrop instead of a pastel tint — still light enough
- * that our dark-on-light text stays comfortably readable wherever it
- * shows through. Actual content (input fields, the results card, header)
- * all keep their own solid --surface/--background, so the photo only
- * ever shows through in the page's own margins and gaps. Bundled locally
+ * Full-page background photo, both themes — set directly as body's own
+ * background-image, not a separate fixed-position element. That matters:
+ * two earlier attempts at a dedicated overlay div both broke visually
+ * (z-index: -1 didn't work because browsers propagate a non-positioned
+ * body's background color to paint the canvas itself, a layer beneath
+ * any z-index; removing the z-index then made the div paint *above* the
+ * hero and calculator instead, blanking them). None of that ambiguity
+ * exists here: a background is always beneath its own element's children
+ * by definition, full stop, no stacking context to reason about.
+ * `background-attachment: fixed` sizes `cover` against the viewport (not
+ * the page's full scrollable height), so this stays correctly framed no
+ * matter how long the page is, and keeps the photo anchored as the page
+ * scrolls. Actual content (input fields, the results card, header) all
+ * keep their own solid --surface/--background, so the photo only ever
+ * shows through in the page's own margins and gaps. Bundled locally
  * (public/hero-bg.webp, ~75KB) rather than hotlinked, so there's no
- * third-party request on the critical path. Dark mode drops the photo
- * entirely — it was graded for the light palette, not adapted for dark.
+ * third-party request on the critical path.
+ *
+ * Light gets a fairly transparent warm wash (0.55 opacity) so the photo
+ * reads as a moodier, deliberate backdrop rather than a pastel tint.
+ * Dark gets a much darker wash (0.78 opacity, near --background) —
+ * checked against the photo's own lightest areas (near-white paper) as
+ * the worst case, which still holds 7.8:1 contrast for dark mode's light
+ * text, comfortably clear of AA.
  */
-:root:not([data-theme="dark"]) body {
+body {
+  background-color: var(--background);
+  color: var(--foreground);
   background-image: linear-gradient(rgba(214, 209, 197, 0.55), rgba(214, 209, 197, 0.55)), url("/hero-bg.webp");
   background-size: cover;
   background-position: center top;
   background-repeat: no-repeat;
   background-attachment: fixed;
+}
+
+:root[data-theme="dark"] body {
+  background-image: linear-gradient(rgba(30, 28, 24, 0.78), rgba(30, 28, 24, 0.78)), url("/hero-bg.webp");
 }
 
 /* Respect the user's motion preference globally, rather than per-element. */

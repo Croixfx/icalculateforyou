@@ -56,7 +56,7 @@ export function ThemeToggle() {
       aria-pressed={isDark}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       title={isDark ? "Switch to light mode" : "Switch to dark mode"}
-      className="flex min-h-11 min-w-11 items-center justify-center rounded-md border border-foreground/20 text-foreground/75 outline-none transition-colors hover:bg-foreground/[0.06] hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+      className="flex min-h-11 min-w-11 items-center justify-center rounded-md text-foreground/75 outline-none transition-colors hover:bg-foreground/[0.06] hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
     >
       {isDark ? (
         // Sun icon — shown when dark is active, click to switch to light.
