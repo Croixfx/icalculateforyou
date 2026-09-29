@@ -27,7 +27,7 @@ export const strings: SiteStrings = {
   content: buildSiteContent(REGIONS.default, "US"),
   footer: {
     disclaimer:
-      "This calculator is for educational purposes only and does not constitute financial advice.",
+      "This calculator does not constitute financial advice.",
     copyright: "CalculatorHub. All rights reserved.",
   },
 };
