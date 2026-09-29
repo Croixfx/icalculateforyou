@@ -46,6 +46,7 @@ export interface CalculatorStrings {
   chartBaselineLabel: string;
   chartWhatIfLabel: string;
   chartYAxisLabel: string;
+  chartXAxisLabel: string;
   scheduleToggleShow: string;
   scheduleToggleHide: string;
   scheduleMonthHeader: string;

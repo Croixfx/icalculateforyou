@@ -45,6 +45,7 @@ export function buildCalculatorStrings(spelling: Spelling): CalculatorStrings {
     chartBaselineLabel: "Your plan",
     chartWhatIfLabel: "With extra payment",
     chartYAxisLabel: "Remaining balance",
+    chartXAxisLabel: "Months",
     scheduleToggleShow: `Show ${amortization} schedule`,
     scheduleToggleHide: `Hide ${amortization} schedule`,
     scheduleMonthHeader: "Month",
