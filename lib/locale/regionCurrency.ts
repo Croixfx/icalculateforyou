@@ -1,91 +1,16 @@
+import territoryCurrency from "./territoryCurrency.json";
+
 /**
- * Maps ISO 3166-1 alpha-2 region codes to their primary ISO 4217 currency.
- * Not exhaustive of every territory on Earth, but covers the large majority
- * of visitors. Anything missing falls back to USD in detectCurrency(), and
- * the manual currency selector always lets a visitor override this guess.
+ * ISO 3166-1 territory -> current ISO 4217 currency, for every territory
+ * Unicode CLDR tracks (254 of them - the handful it omits, like
+ * Antarctica, genuinely have no currency of their own). Generated from
+ * cldr-core by scripts/generate-territory-currency.mjs; see that script
+ * for how "current" is picked and re-run it to pick up a currency
+ * changeover (e.g. a country adopting the euro) once CLDR publishes it.
+ * cldr-core itself is a devDependency only - this module ships just the
+ * small static JSON it produced, no CLDR package at runtime.
  */
-export const REGION_TO_CURRENCY: Record<string, string> = {
-  US: "USD",
-  GB: "GBP",
-  CA: "CAD",
-  AU: "AUD",
-  NZ: "NZD",
-  IE: "EUR",
-  DE: "EUR",
-  FR: "EUR",
-  ES: "EUR",
-  IT: "EUR",
-  NL: "EUR",
-  BE: "EUR",
-  AT: "EUR",
-  PT: "EUR",
-  FI: "EUR",
-  GR: "EUR",
-  LU: "EUR",
-  SK: "EUR",
-  SI: "EUR",
-  LT: "EUR",
-  LV: "EUR",
-  EE: "EUR",
-  CY: "EUR",
-  MT: "EUR",
-  HR: "EUR",
-  CH: "CHF",
-  LI: "CHF",
-  SE: "SEK",
-  NO: "NOK",
-  DK: "DKK",
-  IS: "ISK",
-  PL: "PLN",
-  CZ: "CZK",
-  HU: "HUF",
-  RO: "RON",
-  BG: "BGN",
-  RS: "RSD",
-  UA: "UAH",
-  RU: "RUB",
-  TR: "TRY",
-  IL: "ILS",
-  AE: "AED",
-  SA: "SAR",
-  QA: "QAR",
-  KW: "KWD",
-  BH: "BHD",
-  OM: "OMR",
-  JO: "JOD",
-  EG: "EGP",
-  ZA: "ZAR",
-  NG: "NGN",
-  KE: "KES",
-  GH: "GHS",
-  MA: "MAD",
-  RW: "RWF",
-  IN: "INR",
-  PK: "PKR",
-  BD: "BDT",
-  LK: "LKR",
-  NP: "NPR",
-  CN: "CNY",
-  HK: "HKD",
-  MO: "MOP",
-  TW: "TWD",
-  JP: "JPY",
-  KR: "KRW",
-  SG: "SGD",
-  MY: "MYR",
-  TH: "THB",
-  VN: "VND",
-  PH: "PHP",
-  ID: "IDR",
-  BR: "BRL",
-  MX: "MXN",
-  AR: "ARS",
-  CL: "CLP",
-  CO: "COP",
-  PE: "PEN",
-  UY: "UYU",
-  VE: "VES",
-};
+export const REGION_TO_CURRENCY: Record<string, string> = territoryCurrency;
 
 /**
  * Best-effort currency guess for a region code. Falls back to USD for any
