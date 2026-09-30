@@ -1,5 +1,5 @@
 import { monthlyRateFromAnnual } from "./rate";
-import type { Debt, DebtPayoffEntry, MultiDebtPlan, MultiDebtStrategy } from "./types";
+import type { Debt, DebtPayoffEntry, MultiDebtPlan, MultiDebtStrategy, TotalBalanceRow } from "./types";
 
 const MAX_MONTHS = 1200; // 100 years, a practical safety cap against runaway loops
 const EPSILON = 1e-9; // snaps floating-point dust (e.g. 1.1e-16) to an exact 0 balance
@@ -68,6 +68,7 @@ export function multiDebtPlan(
 
   let month = 0;
   let outstandingCount = debts.filter((d) => d.balance > 0).length;
+  const schedule: TotalBalanceRow[] = [];
 
   while (outstandingCount > 0 && month < MAX_MONTHS) {
     month += 1;
@@ -117,6 +118,9 @@ export function multiDebtPlan(
       target.payoffMonth = month;
       outstandingCount -= 1;
     }
+
+    const totalBalance = Array.from(working.values()).reduce((sum, w) => sum + w.remaining, 0);
+    schedule.push({ month, totalBalance });
   }
 
   if (outstandingCount > 0) {
@@ -142,5 +146,6 @@ export function multiDebtPlan(
     debts: entries,
     totalInterest,
     debtFreeMonth,
+    schedule,
   };
 }

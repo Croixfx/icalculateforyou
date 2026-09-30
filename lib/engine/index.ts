@@ -9,4 +9,5 @@ export type {
   MultiDebtStrategy,
   DebtPayoffEntry,
   MultiDebtPlan,
+  TotalBalanceRow,
 } from "./types";

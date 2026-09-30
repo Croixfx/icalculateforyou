@@ -31,9 +31,15 @@ export interface DebtPayoffEntry {
   totalInterest: number;
 }
 
+export interface TotalBalanceRow {
+  month: number;
+  totalBalance: number;
+}
+
 export interface MultiDebtPlan {
   order: string[];
   debts: DebtPayoffEntry[];
   totalInterest: number;
   debtFreeMonth: number;
+  schedule: TotalBalanceRow[];
 }

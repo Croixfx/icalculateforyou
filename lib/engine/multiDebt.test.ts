@@ -57,6 +57,23 @@ describe("multiDebtPlan", () => {
     expect(plan.debts[0].totalInterest).toBeCloseTo(3930, -1);
   });
 
+  it("schedule's total balance strictly decreases to 0 by debtFreeMonth", () => {
+    const plan = multiDebtPlan(divergentDebts, divergentBudget, "avalanche");
+    expect(plan.schedule).toHaveLength(plan.debtFreeMonth);
+    expect(plan.schedule[0].month).toBe(1);
+    expect(plan.schedule.at(-1)).toEqual({ month: plan.debtFreeMonth, totalBalance: 0 });
+    for (let i = 1; i < plan.schedule.length; i++) {
+      expect(plan.schedule[i].totalBalance).toBeLessThanOrEqual(plan.schedule[i - 1].totalBalance);
+    }
+  });
+
+  it("schedule's first-month total balance matches all debts starting balance minus month-1 principal", () => {
+    const plan = multiDebtPlan(divergentDebts, divergentBudget, "avalanche");
+    const startingTotal = divergentDebts.reduce((sum, d) => sum + d.balance, 0);
+    expect(plan.schedule[0].totalBalance).toBeLessThan(startingTotal);
+    expect(plan.schedule[0].totalBalance).toBeGreaterThan(startingTotal - divergentBudget);
+  });
+
   it("puts all surplus budget toward the target only, not every debt at once", () => {
     const debts: Debt[] = [
       { id: "A", balance: 100, annualRate: 0.1, rateType: "nominal", minPayment: 10 },
