@@ -2,8 +2,15 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
 const PAGES = ["/", "/us/", "/uk/", "/ca/", "/au/"];
+const MULTI_DEBT_PAGES = [
+  "/avalanche-vs-snowball/",
+  "/us/avalanche-vs-snowball/",
+  "/uk/avalanche-vs-snowball/",
+  "/ca/avalanche-vs-snowball/",
+  "/au/avalanche-vs-snowball/",
+];
 
-for (const path of PAGES) {
+for (const path of [...PAGES, ...MULTI_DEBT_PAGES]) {
   test(`${path} has no automatic accessibility violations (default pre-filled state)`, async ({ page }) => {
     await page.goto(path);
     await page.waitForLoadState("networkidle");
@@ -48,4 +55,31 @@ test("/us/ has no violations in dark mode", async ({ page }) => {
     console.log("Violations on dark /us/:", JSON.stringify(results.violations, null, 2));
   }
   expect(results.violations, "a11y violations on dark /us/").toEqual([]);
+});
+
+test("/us/avalanche-vs-snowball/ has no violations once the comparison is showing", async ({ page }) => {
+  await page.goto("/us/avalanche-vs-snowball/");
+  await page.waitForLoadState("networkidle");
+  await page.waitForTimeout(200);
+
+  const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
+
+  if (results.violations.length > 0) {
+    console.log("Violations on filled /us/avalanche-vs-snowball/:", JSON.stringify(results.violations, null, 2));
+  }
+  expect(results.violations, "a11y violations on filled /us/avalanche-vs-snowball/").toEqual([]);
+});
+
+test("/us/avalanche-vs-snowball/ has no violations in dark mode", async ({ page }) => {
+  await page.emulateMedia({ colorScheme: "dark" });
+  await page.goto("/us/avalanche-vs-snowball/");
+  await page.waitForLoadState("networkidle");
+  await page.waitForTimeout(200);
+
+  const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
+
+  if (results.violations.length > 0) {
+    console.log("Violations on dark /us/avalanche-vs-snowball/:", JSON.stringify(results.violations, null, 2));
+  }
+  expect(results.violations, "a11y violations on dark /us/avalanche-vs-snowball/").toEqual([]);
 });

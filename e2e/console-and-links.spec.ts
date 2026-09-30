@@ -1,6 +1,14 @@
 import { expect, test, type Page } from "@playwright/test";
 
 const PAGES = ["/", "/us/", "/uk/", "/ca/", "/au/"];
+const MULTI_DEBT_PAGES = [
+  "/avalanche-vs-snowball/",
+  "/us/avalanche-vs-snowball/",
+  "/uk/avalanche-vs-snowball/",
+  "/ca/avalanche-vs-snowball/",
+  "/au/avalanche-vs-snowball/",
+];
+const ALL_PAGES = [...PAGES, ...MULTI_DEBT_PAGES];
 
 async function collectConsoleIssues(page: Page) {
   const messages: { type: string; text: string }[] = [];
@@ -15,7 +23,7 @@ async function collectConsoleIssues(page: Page) {
   return messages;
 }
 
-for (const path of PAGES) {
+for (const path of ALL_PAGES) {
   test(`no console errors/warnings on ${path}`, async ({ page }) => {
     const issues = await collectConsoleIssues(page);
     const response = await page.goto(path);
@@ -31,7 +39,7 @@ for (const path of PAGES) {
   });
 }
 
-for (const path of PAGES) {
+for (const path of ALL_PAGES) {
   test(`every internal link on ${path} resolves to 200`, async ({ page, request }) => {
     await page.goto(path);
     await page.waitForLoadState("networkidle");
@@ -72,8 +80,22 @@ test("hreflang alternate URLs all resolve to 200", async ({ page, request }) => 
   }
 });
 
+test("hreflang alternate URLs on the avalanche-vs-snowball page all resolve to 200", async ({ page, request }) => {
+  await page.goto("/us/avalanche-vs-snowball/");
+  const hreflangUrls = await page.$$eval('link[rel="alternate"]', (links) =>
+    links.map((l) => l.getAttribute("href")).filter((h): h is string => !!h),
+  );
+  expect(hreflangUrls.length).toBeGreaterThan(0);
+
+  for (const url of hreflangUrls) {
+    const path = new URL(url).pathname;
+    const res = await request.get(path, { failOnStatusCode: false });
+    expect(res.status(), `${url} -> ${path}`).toBe(200);
+  }
+});
+
 test("canonical URL is present and resolvable on every page", async ({ page, request }) => {
-  for (const path of PAGES) {
+  for (const path of ALL_PAGES) {
     await page.goto(path);
     const canonical = await page.$eval('link[rel="canonical"]', (l) => l.getAttribute("href"));
     expect(canonical, `canonical on ${path}`).toBeTruthy();
