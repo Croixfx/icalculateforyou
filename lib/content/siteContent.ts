@@ -34,9 +34,7 @@ export function buildSiteContent(region: RegionConfig, spelling: Spelling): Cont
       "interest rate first, which minimizes the total interest you'll pay overall; " +
       "and the snowball method, where you target the smallest balance first " +
       "instead, which clears individual debts faster and can be easier to stick " +
-      "with. Avalanche wins on the math; snowball often wins on momentum. A " +
-      "calculator for running both strategies across multiple debts at once is " +
-      "planned for a future page.",
+      "with. Avalanche wins on the math; snowball often wins on momentum.",
     strategiesLinkLabel: "Compare snowball vs. avalanche for multiple debts",
     strategiesLinkHref: `${region.path}avalanche-vs-snowball/`,
     faqHeading: "Frequently asked questions",

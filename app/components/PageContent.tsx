@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ContentStrings } from "@/lib/content";
 
 interface PageContentProps {
@@ -27,9 +28,13 @@ export function PageContent({ content }: PageContentProps) {
         <section>
           <h2 className="text-xl font-semibold tracking-tight">{content.strategiesHeading}</h2>
           <p className="mt-3 text-base leading-relaxed text-foreground/75 sm:text-lg">{content.strategiesBody}</p>
-          {/* TODO: content.strategiesLinkHref points to a multi-debt comparison
-              page that doesn't exist yet. Re-add this link (and drop this
-              comment) once that page ships — an internal link must never 404. */}
+          <Link
+            href={content.strategiesLinkHref}
+            prefetch={false}
+            className="mt-3 inline-flex min-h-11 items-center text-base font-medium text-accent underline-offset-2 hover:underline sm:text-lg"
+          >
+            {content.strategiesLinkLabel} →
+          </Link>
         </section>
 
         <section>

@@ -19,4 +19,14 @@ export function getStrings(region: RegionKey): SiteStrings {
 }
 
 export { REGIONS, SITE_URL, alternateLanguages };
-export type { RegionKey, RegionConfig, SiteStrings, CalculatorStrings, ContentStrings, FaqItem } from "./types";
+export type {
+  RegionKey,
+  RegionConfig,
+  SiteStrings,
+  CalculatorStrings,
+  ContentStrings,
+  FaqItem,
+  MultiDebtPageStrings,
+  MultiDebtCalculatorStrings,
+  MultiDebtContentStrings,
+} from "./types";

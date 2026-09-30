@@ -1,4 +1,5 @@
 import { buildCalculatorStrings } from "./calculatorStrings";
+import { buildMultiDebtStrings } from "./multiDebtStrings";
 import { buildSiteContent } from "./siteContent";
 import { REGIONS } from "./regions";
 import type { SiteStrings } from "./types";
@@ -20,6 +21,7 @@ export const strings: SiteStrings = {
   },
   calculator: buildCalculatorStrings("US"),
   content: buildSiteContent(REGIONS.us, "US"),
+  multiDebt: buildMultiDebtStrings(REGIONS.us, "US"),
   footer: {
     disclaimer:
       "This calculator does not constitute financial advice.",

@@ -48,12 +48,14 @@ export const REGIONS: Record<RegionKey, RegionConfig> = {
 /**
  * The full set of alternate-language URLs for hreflang tags, shared by every
  * page since all regional variants (plus the global default) always exist
- * together.
+ * together. `subpath` (e.g. "avalanche-vs-snowball/") points these at a
+ * secondary tool that lives under every region instead of the main
+ * calculator itself.
  */
-export function alternateLanguages(): Record<string, string> {
+export function alternateLanguages(subpath = ""): Record<string, string> {
   const languages: Record<string, string> = {};
   for (const region of Object.values(REGIONS)) {
-    languages[region.hreflang] = `${SITE_URL}${region.path}`;
+    languages[region.hreflang] = `${SITE_URL}${region.path}${subpath}`;
   }
   return languages;
 }

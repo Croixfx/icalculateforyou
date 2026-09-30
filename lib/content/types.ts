@@ -95,4 +95,71 @@ export interface SiteStrings {
     disclaimer: string;
     copyright: string;
   };
+  multiDebt: MultiDebtPageStrings;
+}
+
+export interface MultiDebtCalculatorStrings {
+  debtsHeading: string;
+  debtNameLabel: string;
+  /** {n} is replaced with the debt's 1-based position, e.g. "Debt 1". */
+  debtNamePlaceholder: string;
+  debtBalanceLabel: string;
+  debtRateLabel: string;
+  debtMinPaymentLabel: string;
+  addDebtButton: string;
+  /** {name} is replaced with the debt's own name. */
+  removeDebtButton: string;
+  currencyLabel: string;
+
+  budgetHeading: string;
+  budgetLabel: string;
+  /** {min} is replaced with the formatted minimum budget needed. */
+  budgetTooLowMessage: string;
+
+  comparisonHeading: string;
+  avalancheHeading: string;
+  avalancheDescription: string;
+  snowballHeading: string;
+  snowballDescription: string;
+  debtFreeDateLabel: string;
+  totalInterestLabel: string;
+  payoffOrderLabel: string;
+  /** {month} is replaced with the 1-based month number a debt is cleared in. */
+  clearedInMonthLabel: string;
+  /** {method}, {amount}, and {percent} describe how much the cheaper method saves. */
+  winnerMessage: string;
+  tieMessage: string;
+  motivationNote: string;
+
+  chartTitle: string;
+  chartXAxisLabel: string;
+  chartAvalancheLabel: string;
+  chartSnowballLabel: string;
+
+  errorRequired: string;
+  errorNotANumber: string;
+  errorMustBePositive: string;
+  /** {max} is replaced with the formatted maximum. */
+  errorTooLarge: string;
+
+  copyLinkButton: string;
+  copyLinkCopied: string;
+}
+
+export interface MultiDebtContentStrings {
+  explainerHeading: string;
+  explainerBody: string;
+}
+
+export interface MultiDebtPageStrings {
+  meta: {
+    title: string;
+    description: string;
+  };
+  hero: {
+    title: string;
+    subtitle: string;
+  };
+  calculator: MultiDebtCalculatorStrings;
+  content: MultiDebtContentStrings;
 }
