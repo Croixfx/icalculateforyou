@@ -5,6 +5,7 @@ export {
   setPreferredCurrency,
   resolveCurrency,
 } from "./detect";
+export { detectCountryFromNetwork } from "./networkDetect";
 export { currencyForRegion, REGION_TO_CURRENCY } from "./regionCurrency";
 export { getCurrencyDisplayName, getCurrencyOptions, getSupportedCurrencies } from "./currencyList";
 export type { CurrencyOption } from "./currencyList";

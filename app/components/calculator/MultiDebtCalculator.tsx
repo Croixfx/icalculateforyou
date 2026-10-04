@@ -2,7 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { multiDebtPlan, type Debt, type MultiDebtPlan } from "@/lib/engine";
-import { formatCurrency, getCurrencyOptions, getPreferredCurrency, detectLocale, setPreferredCurrency } from "@/lib/locale";
+import {
+  currencyForRegion,
+  detectCountryFromNetwork,
+  detectLocale,
+  formatCurrency,
+  getCurrencyOptions,
+  getPreferredCurrency,
+  setPreferredCurrency,
+} from "@/lib/locale";
 import { addMonths, formatMonthYear, interpolate, type FieldResult, type ValidationError } from "@/lib/calculator";
 import {
   buildMultiDebtShareUrl,
@@ -103,17 +111,31 @@ export function MultiDebtCalculator({ region }: MultiDebtCalculatorProps) {
 
   // Same reasoning as the single-debt calculator: render the region default
   // first (matches the server), then layer in a shared link and the saved/
-  // detected currency after mount, to avoid a hydration mismatch.
+  // detected currency after mount, to avoid a hydration mismatch. Browser
+  // language is then upgraded to a real network-based country guess once it
+  // resolves - see DebtPayoffCalculator for the full rationale.
   useEffect(() => {
     const fromUrl = decodeMultiDebtState(window.location.search);
+    const savedCurrency = getPreferredCurrency();
     const fallbackCurrency = region === "default" ? detectLocale().currency : config.currency;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setState((prev) => ({
       ...prev,
       ...fromUrl,
-      currency: fromUrl.currency ?? getPreferredCurrency() ?? fallbackCurrency,
+      currency: fromUrl.currency ?? savedCurrency ?? fallbackCurrency,
     }));
     setHydrated(true);
+
+    if (region !== "default" || fromUrl.currency || savedCurrency) return;
+    let cancelled = false;
+    detectCountryFromNetwork().then((country) => {
+      if (cancelled || !country) return;
+      const networkCurrency = currencyForRegion(country);
+      setState((prev) => (prev.currency === fallbackCurrency ? { ...prev, currency: networkCurrency } : prev));
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [region, config.currency]);
 
   useEffect(() => {

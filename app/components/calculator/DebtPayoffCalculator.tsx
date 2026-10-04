@@ -2,7 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { monthsToPayoff, paymentForTarget, type PayoffResult } from "@/lib/engine";
-import { formatCurrency, getCurrencyOptions, getPreferredCurrency, detectLocale, setPreferredCurrency } from "@/lib/locale";
+import {
+  currencyForRegion,
+  detectCountryFromNetwork,
+  detectLocale,
+  formatCurrency,
+  getCurrencyOptions,
+  getPreferredCurrency,
+  setPreferredCurrency,
+} from "@/lib/locale";
 import {
   addMonths,
   buildShareUrl,
@@ -103,10 +111,12 @@ export function DebtPayoffCalculator({ region }: DebtPayoffCalculatorProps) {
   // Currency priority: URL param > a previously saved manual choice > the
   // region's own currency for a country page (a /ca/ visitor should see CAD
   // by default, not whatever their browser's locale happens to suggest) >
-  // browser detection, which only makes sense on the currency-agnostic "/"
-  // page.
+  // a real network-based country guess (see below) > browser-language
+  // detection, used only until the network guess resolves. Both guesses
+  // only make sense on the currency-agnostic "/" page.
   useEffect(() => {
     const fromUrl = decodeFormState(window.location.search);
+    const savedCurrency = getPreferredCurrency();
     const fallbackCurrency = region === "default" ? detectLocale().currency : config.currency;
     // Adopting client-only external state (URL, localStorage) on mount; a
     // lazy useState initializer would also run during SSR and cause a
@@ -115,9 +125,25 @@ export function DebtPayoffCalculator({ region }: DebtPayoffCalculatorProps) {
     setState((prev) => ({
       ...prev,
       ...fromUrl,
-      currency: fromUrl.currency ?? getPreferredCurrency() ?? fallbackCurrency,
+      currency: fromUrl.currency ?? savedCurrency ?? fallbackCurrency,
     }));
     setHydrated(true);
+
+    // Browser language is a weak signal (a Rwandan visitor with their
+    // browser set to en-US reads as American) - upgrade to a real,
+    // network-based country guess once it resolves. Only on the default
+    // page, and only if nothing more authoritative (a shared link or an
+    // earlier manual choice) already decided the currency.
+    if (region !== "default" || fromUrl.currency || savedCurrency) return;
+    let cancelled = false;
+    detectCountryFromNetwork().then((country) => {
+      if (cancelled || !country) return;
+      const networkCurrency = currencyForRegion(country);
+      setState((prev) => (prev.currency === fallbackCurrency ? { ...prev, currency: networkCurrency } : prev));
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [region, config.currency]);
 
   // Keep the URL in sync so the current result is always a shareable link,
