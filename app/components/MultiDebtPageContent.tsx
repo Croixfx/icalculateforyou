@@ -4,12 +4,7 @@ interface MultiDebtPageContentProps {
   content: MultiDebtContentStrings;
 }
 
-/**
- * Explainer content below the avalanche-vs-snowball tool. Placeholder copy
- * (both heading and body are literally prefixed "TODO" in
- * lib/content/multiDebtStrings.ts) - flagged for review rather than shipped
- * as finished, unlike the rest of the site's content.
- */
+/** Explainer content below the avalanche-vs-snowball tool. */
 export function MultiDebtPageContent({ content }: MultiDebtPageContentProps) {
   return (
     <div className="mt-14">

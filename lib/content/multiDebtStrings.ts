@@ -68,12 +68,9 @@ export function buildMultiDebtStrings(region: RegionConfig, spelling: Spelling):
       copyLinkCopied: "Link copied",
     },
     content: {
-      // TODO(review): placeholder explainer copy - replace before this page
-      // is considered final. Flagged per request rather than shipped as
-      // finished copy the way the rest of the site's content is.
-      explainerHeading: "TODO: How to use this comparison",
+      explainerHeading: "How to use this comparison",
       explainerBody:
-        "TODO - draft real explainer copy here (what avalanche/snowball mean, how the budget and minimums interact, and when to prefer one method over the other). This paragraph is a placeholder standing in for that content.",
+        "Add every debt you're carrying — balance, interest rate, and minimum payment — then set the total amount you can put toward all of them each month. That budget has to cover every minimum payment combined; whatever's left over goes entirely to one debt at a time. Avalanche puts it toward whichever debt has the highest interest rate; snowball puts it toward whichever has the smallest balance. Once a targeted debt clears, its minimum payment joins the leftover budget and moves to the next one in line, so the extra payment toward the current target grows every time a debt is paid off. Avalanche always matches or beats snowball on total interest, since it pays down the most expensive debt first — but snowball clears individual debts faster, which can make it easier to stick with if seeing quick wins is what keeps you going.",
     },
   };
 }
