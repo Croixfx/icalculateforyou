@@ -94,6 +94,10 @@ export interface SiteStrings {
   footer: {
     disclaimer: string;
     copyright: string;
+    /** Region-switcher links, e.g. the country list - secondary to the
+     *  header nav so they stay reachable (and crawlable) without cluttering
+     *  the primary nav. Empty unless a region actually has siblings to link. */
+    nav: { label: string; href: string }[];
   };
   multiDebt: MultiDebtPageStrings;
 }

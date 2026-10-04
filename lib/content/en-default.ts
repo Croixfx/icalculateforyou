@@ -12,12 +12,7 @@ export const strings: SiteStrings = {
   },
   header: {
     siteName: "CalculatorHub",
-    nav: [
-      { label: "United States", href: "/us/" },
-      { label: "United Kingdom", href: "/uk/" },
-      { label: "Canada", href: "/ca/" },
-      { label: "Australia", href: "/au/" },
-    ],
+    nav: [{ label: "Compare multiple debts", href: "/avalanche-vs-snowball/" }],
   },
   hero: {
     title: "Pay Off Debt Faster",
@@ -31,5 +26,11 @@ export const strings: SiteStrings = {
     disclaimer:
       "This calculator does not constitute financial advice.",
     copyright: "CalculatorHub. All rights reserved.",
+    nav: [
+      { label: "United States", href: "/us/" },
+      { label: "United Kingdom", href: "/uk/" },
+      { label: "Canada", href: "/ca/" },
+      { label: "Australia", href: "/au/" },
+    ],
   },
 };
